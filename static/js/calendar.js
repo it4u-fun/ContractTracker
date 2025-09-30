@@ -386,6 +386,7 @@ class ContractCalendar {
         // Show calendar container
         if (container) {
             container.style.display = 'block';
+            container.className = 'calendar-container'; // Add grid layout class
             container.innerHTML = '';
             
             this.calendarMonths.forEach(month => {

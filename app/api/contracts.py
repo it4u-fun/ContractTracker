@@ -187,6 +187,46 @@ def update_contract(contract_key: str):
             'error': str(e)
         }), 500
 
+# Optional: endpoints by id to avoid key issues
+@contracts_bp.route('/id/<contract_id>')
+def get_contract_by_id(contract_id: str):
+    try:
+        # Iterate to find contract by id
+        contracts = current_app.data_manager.get_all_contracts()
+        for key, contract in contracts.items():
+            if contract.contract_id == contract_id:
+                validation_result = ValidationService.validate_contract(contract)
+                return jsonify({'success': True, 'contract': contract.to_dict(), 'validation': validation_result})
+        return jsonify({'success': False, 'error': 'Contract not found'}), 404
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@contracts_bp.route('/id/<contract_id>', methods=['PUT'])
+def update_contract_by_id(contract_id: str):
+    try:
+        # Iterate to find contract by id
+        contracts = current_app.data_manager.get_all_contracts()
+        target_key = None
+        for key, contract in contracts.items():
+            if contract.contract_id == contract_id:
+                target_key = key
+                break
+        if not target_key:
+            return jsonify({'success': False, 'error': 'Contract not found'}), 404
+
+        contract = current_app.data_manager.get_contract(target_key)
+        data = request.get_json() or {}
+        updatable_fields = ['staff_name', 'client_company', 'contract_name',
+                           'start_date', 'end_date', 'total_days', 'daily_rate']
+        for field in updatable_fields:
+            if field in data:
+                setattr(contract, field, data[field])
+        if current_app.data_manager.update_contract_under_key(target_key, contract):
+            return jsonify({'success': True, 'contract': contract.to_dict(), 'contract_key': target_key})
+        return jsonify({'success': False, 'error': 'Failed to update contract'}), 500
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @contracts_bp.route('/<contract_key>', methods=['DELETE'])
 def delete_contract(contract_key: str):
     """Delete a contract."""

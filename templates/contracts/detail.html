@@ -206,6 +206,7 @@ async function loadContractDetails() {
             const contract = data.contract;
             // Always use original URL key to reference this contract
             window.__currentContractKey = contractKey;
+            window.__currentContractId = contract.contract_id;
             
             // Update page title and info
             document.title = `${contract.client_company} - ${contract.contract_name} - Contract Tracker`;
@@ -354,7 +355,8 @@ async function saveContractEdits() {
         if (totalDaysInput && totalDaysInput.value) payload.total_days = parseInt(totalDaysInput.value, 10);
         if (dailyRateInput && dailyRateInput.value) payload.daily_rate = parseInt(dailyRateInput.value, 10);
 
-        const response = await fetch(`/api/contracts/${window.__currentContractKey || contractKey}`, {
+        const endpoint = window.__currentContractId ? `/api/contracts/id/${window.__currentContractId}` : `/api/contracts/${window.__currentContractKey || contractKey}`;
+        const response = await fetch(endpoint, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

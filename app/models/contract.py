@@ -3,6 +3,7 @@ Contract model for managing contract data and business logic.
 """
 
 from datetime import datetime, timedelta
+import uuid
 import html as _html
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
@@ -50,6 +51,7 @@ class Contract:
     """Represents a contract with all its data and business logic."""
     
     # Contract identification
+    contract_id: Optional[str] = None
     staff_name: str
     client_company: str
     contract_name: str
@@ -79,6 +81,9 @@ class Contract:
         self._validate_inputs()
 
         now = datetime.now().isoformat()
+        if self.contract_id is None:
+            # Stable unique identifier, independent of key
+            self.contract_id = str(uuid.uuid4())
         if self.created_at is None:
             self.created_at = now
         self.updated_at = now
@@ -268,6 +273,7 @@ class Contract:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
+            'contract_id': self.contract_id,
             'contract_key': self.contract_key,
             'staff_name': _html.unescape(self.staff_name),
             'client_company': _html.unescape(self.client_company),
@@ -298,6 +304,7 @@ class Contract:
                 days[date] = DayAllocation.from_dict(day_data)
         
         return cls(
+            contract_id=data.get('contract_id'),
             staff_name=data['staff_name'],
             client_company=data['client_company'],
             contract_name=data['contract_name'],

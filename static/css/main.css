@@ -143,7 +143,7 @@ body {
 /* Calendar Styles */
 .calendar-container {
     display: grid !important;
-    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)) !important;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)) !important;
     gap: 1.5rem !important;
     padding: 1rem 0 !important;
 }
@@ -354,13 +354,14 @@ body {
 /* Day number positioning */
 .day-number {
     position: absolute;
-    top: 4px;
+    top: 2px;
     left: 2px;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     z-index: 5;
-    min-width: 16px;
+    min-width: 12px;
     text-align: left;
+    line-height: 1;
 }
 
 /* Weekend indicator */

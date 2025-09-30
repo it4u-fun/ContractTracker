@@ -363,11 +363,7 @@ async function saveContractEdits() {
 
         if (response.ok && data.success) {
             showFlashMessage('Contract updated successfully', 'success');
-            if (data.contract_key && data.contract_key !== window.__currentContractKey) {
-                // If key changed, redirect to the new details URL to avoid duplicate state
-                window.location.replace(`/contracts/${encodeURIComponent(data.contract_key)}`);
-                return;
-            }
+            // Key is preserved; no redirect is necessary
             // Hide modal and refresh the details in-place
             bootstrap.Modal.getInstance(document.getElementById('editContractModal')).hide();
             await loadContractDetails();

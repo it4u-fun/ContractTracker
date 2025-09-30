@@ -168,16 +168,12 @@ def update_contract(contract_key: str):
             if field in data:
                 setattr(contract, field, data[field])
         
-        # Save updated contract under possibly new key
-        new_key = contract.contract_key
-        if new_key != original_key:
-            # Remove old record then save under new key (rename)
-            current_app.data_manager.delete_contract(original_key)
-        if current_app.data_manager.save_contract(contract):
+        # Save updated contract under the original key (preserve key)
+        if current_app.data_manager.update_contract_under_key(original_key, contract):
             return jsonify({
                 'success': True,
                 'contract': contract.to_dict(),
-                'contract_key': new_key
+                'contract_key': original_key
             })
         else:
             return jsonify({

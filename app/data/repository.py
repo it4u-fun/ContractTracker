@@ -114,6 +114,13 @@ class ContractRepository(BaseRepository):
         """Update an existing contract."""
         return self.save_contract(contract)  # Same as save for JSON storage
     
+    def update_contract_under_key(self, original_key: str, contract: Contract) -> bool:
+        """Update a contract but persist under the original key (no rename)."""
+        sanitized_key = DataSanitizer.sanitize_string(original_key)
+        data = self._load_data()
+        data[sanitized_key] = contract.to_dict()
+        return self._save_data(data)
+    
     def delete_contract(self, contract_key: str) -> bool:
         """Delete a contract with sanitized key."""
         # Sanitize contract key
@@ -200,6 +207,10 @@ class DataManager:
     def save_contract(self, contract: Contract) -> bool:
         """Save a contract."""
         return self.contracts.save_contract(contract)
+    
+    def update_contract_under_key(self, original_key: str, contract: Contract) -> bool:
+        """Update a contract stored under a fixed key without renaming the key."""
+        return self.contracts.update_contract_under_key(original_key, contract)
     
     def delete_contract(self, contract_key: str) -> bool:
         """Delete a contract."""

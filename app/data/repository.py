@@ -93,7 +93,16 @@ class ContractRepository(BaseRepository):
         contract_data = data.get(contract_key)
         
         if contract_data is None:
-            return None
+            # Fallback: find by stored 'contract_key' field (in case of legacy key formats)
+            for k, v in data.items():
+                try:
+                    if isinstance(v, dict) and v.get('contract_key') == contract_key:
+                        contract_data = v
+                        break
+                except Exception:
+                    continue
+            if contract_data is None:
+                return None
         
         try:
             return Contract.from_dict(contract_data)

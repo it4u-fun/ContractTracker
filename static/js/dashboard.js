@@ -4,8 +4,10 @@
 
 class Dashboard {
     constructor() {
-        this.contracts = [];
+        this.activeContracts = [];
+        this.archivedContracts = [];
         this.settings = {};
+        this.showArchived = false;
         this.init();
     }
 
@@ -23,7 +25,8 @@ class Dashboard {
         const data = await Utils.apiRequest('/api/dashboard/');
         
         if (data.success) {
-            this.contracts = data.dashboard.contracts;
+            this.activeContracts = data.dashboard.contracts || [];
+            this.archivedContracts = data.dashboard.archived_contracts || [];
             this.settings = data.settings;
         } else {
             throw new Error(data.error || 'Failed to load dashboard data');
@@ -32,13 +35,14 @@ class Dashboard {
 
     renderDashboard() {
         this.updateStats();
-        this.renderContracts();
+        this.renderActiveContracts();
+        this.renderArchivedContracts();
     }
 
     updateStats() {
-        const totalContracts = this.contracts.length;
-        const totalValue = this.contracts.reduce((sum, contract) => sum + contract.total_value, 0);
-        const totalEarned = this.contracts.reduce((sum, contract) => sum + contract.earned_value, 0);
+        const totalContracts = this.activeContracts.length;
+        const totalValue = this.activeContracts.reduce((sum, contract) => sum + contract.total_value, 0);
+        const totalEarned = this.activeContracts.reduce((sum, contract) => sum + contract.earned_value, 0);
         const totalRemaining = totalValue - totalEarned;
 
         document.getElementById('total-contracts').textContent = totalContracts;
@@ -47,7 +51,7 @@ class Dashboard {
         document.getElementById('total-remaining').textContent = Utils.formatCurrency(totalRemaining);
     }
 
-    renderContracts() {
+    renderActiveContracts() {
         const container = document.getElementById('contracts-container');
         const loadingState = document.getElementById('loading-state');
         const emptyState = document.getElementById('empty-state');
@@ -57,7 +61,7 @@ class Dashboard {
             loadingState.style.display = 'none';
         }
 
-        if (this.contracts.length === 0) {
+        if (this.activeContracts.length === 0) {
             // Show empty state
             if (emptyState) {
                 emptyState.style.display = 'block';
@@ -73,19 +77,49 @@ class Dashboard {
             emptyState.style.display = 'none';
         }
 
-        // Render contracts
+        // Render active contracts
         if (container) {
             container.innerHTML = '';
-            this.contracts.forEach(contract => {
-                const contractCard = this.createContractCard(contract);
+            this.activeContracts.forEach(contract => {
+                const contractCard = this.createContractCard(contract, false); // false = not archived
                 container.appendChild(contractCard);
             });
         }
     }
 
-    createContractCard(contract) {
+    renderArchivedContracts() {
+        const container = document.getElementById('archived-contracts-container');
+        const emptyState = document.getElementById('empty-archived-state');
+
+        if (this.archivedContracts.length === 0) {
+            // Show empty archived state
+            if (emptyState) {
+                emptyState.style.display = 'block';
+            }
+            if (container) {
+                container.innerHTML = '';
+            }
+            return;
+        }
+
+        // Hide empty archived state
+        if (emptyState) {
+            emptyState.style.display = 'none';
+        }
+
+        // Render archived contracts
+        if (container) {
+            container.innerHTML = '';
+            this.archivedContracts.forEach(contract => {
+                const contractCard = this.createContractCard(contract, true); // true = archived
+                container.appendChild(contractCard);
+            });
+        }
+    }
+
+    createContractCard(contract, isArchived = false) {
         const card = document.createElement('div');
-        card.className = 'contract-card card mb-4 fade-in';
+        card.className = `contract-card card mb-4 fade-in ${isArchived ? 'archived' : ''}`;
         card.setAttribute('data-contract-key', contract.key);
 
         const progressPercentage = contract.total_days > 0 ? 
@@ -163,16 +197,31 @@ class Dashboard {
             <div class="card-footer">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <a href="/contracts/${encodeURIComponent(contract.key)}/calendar" class="btn btn-primary btn-sm">
-                            <i class="fas fa-calendar me-1"></i>
-                            Calendar
-                        </a>
-                        <a href="/contracts/${encodeURIComponent(contract.key)}" class="btn btn-outline-secondary btn-sm ms-2">
+                        ${isArchived ? '' : `
+                            <a href="/contracts/${encodeURIComponent(contract.key)}/calendar" class="btn btn-primary btn-sm">
+                                <i class="fas fa-calendar me-1"></i>
+                                Calendar
+                            </a>
+                        `}
+                        <a href="/contracts/${encodeURIComponent(contract.key)}" class="btn btn-outline-secondary btn-sm ${isArchived ? '' : 'ms-2'}">
                             <i class="fas fa-eye me-1"></i>
                             Details
                         </a>
                     </div>
                     <div>
+                        ${isArchived ? `
+                            <button class="btn btn-outline-success btn-sm me-2" 
+                                    onclick="dashboard.unarchiveContract('${contract.key}')">
+                                <i class="fas fa-undo me-1"></i>
+                                Unarchive
+                            </button>
+                        ` : `
+                            <button class="btn btn-outline-warning btn-sm me-2" 
+                                    onclick="dashboard.archiveContract('${contract.key}')">
+                                <i class="fas fa-archive me-1"></i>
+                                Archive
+                            </button>
+                        `}
                         <button class="btn btn-outline-danger btn-sm" 
                                 onclick="dashboard.deleteContract('${contract.key}')">
                             <i class="fas fa-trash me-1"></i>
@@ -200,17 +249,89 @@ class Dashboard {
                 showFlashMessage('Contract deleted successfully', 'success');
                 
                 // Remove contract from local data
-                this.contracts = this.contracts.filter(contract => contract.key !== contractKey);
+                this.activeContracts = this.activeContracts.filter(contract => contract.key !== contractKey);
+                this.archivedContracts = this.archivedContracts.filter(contract => contract.key !== contractKey);
                 
                 // Update display
                 this.updateStats();
-                this.renderContracts();
+                this.renderActiveContracts();
+                this.renderArchivedContracts();
             } else {
                 throw new Error(data.error || 'Failed to delete contract');
             }
         } catch (error) {
             console.error('Error deleting contract:', error);
             showFlashMessage(error.message || 'Failed to delete contract', 'danger');
+        }
+    }
+
+    async archiveContract(contractKey) {
+        if (!confirm('Are you sure you want to archive this contract? You can unarchive it later.')) {
+            return;
+        }
+
+        try {
+            const data = await Utils.apiRequest(`/api/contracts/${contractKey}/archive`, {
+                method: 'POST'
+            });
+
+            if (data.success) {
+                showFlashMessage('Contract archived successfully', 'success');
+                
+                // Move contract from active to archived
+                const contractIndex = this.activeContracts.findIndex(contract => contract.key === contractKey);
+                if (contractIndex !== -1) {
+                    const contract = this.activeContracts[contractIndex];
+                    contract.status = 'archived';
+                    this.archivedContracts.push(contract);
+                    this.activeContracts.splice(contractIndex, 1);
+                }
+                
+                // Update display
+                this.updateStats();
+                this.renderActiveContracts();
+                this.renderArchivedContracts();
+            } else {
+                throw new Error(data.error || 'Failed to archive contract');
+            }
+        } catch (error) {
+            console.error('Error archiving contract:', error);
+            showFlashMessage(error.message || 'Failed to archive contract', 'danger');
+        }
+    }
+
+    async unarchiveContract(contractKey) {
+        if (!confirm('Are you sure you want to unarchive this contract?')) {
+            return;
+        }
+
+        try {
+            const data = await Utils.apiRequest(`/api/contracts/${contractKey}/unarchive`, {
+                method: 'POST'
+            });
+
+            if (data.success) {
+                showFlashMessage('Contract unarchived successfully', 'success');
+                
+                // Move contract from archived to active
+                const contractIndex = this.archivedContracts.findIndex(contract => contract.key === contractKey);
+                if (contractIndex !== -1) {
+                    const contract = this.archivedContracts[contractIndex];
+                    contract.status = 'active';
+                    this.activeContracts.push(contract);
+                    this.archivedContracts.splice(contractIndex, 1);
+                }
+                
+                // Update display
+                this.updateStats();
+                this.renderActiveContracts();
+                this.renderArchivedContracts();
+            } else {
+                throw new Error(data.error || 'Failed to unarchive contract');
+            }
+        } catch (error) {
+            console.error('Error unarchiving contract:', error);
+            showFlashMessage(error.message || 'Failed to unarchive contract', 'danger');
         }
     }
 
@@ -260,6 +381,26 @@ class Dashboard {
 function refreshDashboard() {
     if (window.dashboard) {
         window.dashboard.refresh();
+    }
+}
+
+function toggleArchived() {
+    const archivedSection = document.getElementById('archived-section');
+    const showArchivedBtn = document.getElementById('show-archived-btn');
+    
+    if (archivedSection && showArchivedBtn) {
+        if (archivedSection.style.display === 'none' || archivedSection.style.display === '') {
+            // Show archived section
+            archivedSection.style.display = 'block';
+            showArchivedBtn.innerHTML = '<i class="fas fa-archive me-1"></i>Hide Archived';
+            
+            // Scroll to archived section
+            archivedSection.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            // Hide archived section
+            archivedSection.style.display = 'none';
+            showArchivedBtn.innerHTML = '<i class="fas fa-archive me-1"></i>Show Archived';
+        }
     }
 }
 

@@ -21,17 +21,17 @@
 </div>
 
 <!-- Dashboard Stats -->
-<div class="row mb-4">
+<div class="row mb-4 dashboard-stats">
     <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
+        <div class="card" style="background-color: #0066cc !important; color: #ffffff !important; border: 3px solid #004499 !important;">
+            <div class="card-body" style="background-color: transparent !important;">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4 class="card-title" id="total-contracts">0</h4>
-                        <p class="card-text">Total Contracts</p>
+                        <h4 class="card-title" id="total-contracts" style="color: #ffffff !important; font-weight: bold;">0</h4>
+                        <p class="card-text" style="color: #ffffff !important; font-weight: bold;">Total Contracts</p>
                     </div>
                     <div class="align-self-center">
-                        <i class="fas fa-file-contract fa-2x"></i>
+                        <i class="fas fa-file-contract fa-2x" style="color: #ffffff !important;"></i>
                     </div>
                 </div>
             </div>
@@ -39,15 +39,15 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body">
+        <div class="card" style="background-color: #00aa44 !important; color: #ffffff !important; border: 3px solid #008833 !important;">
+            <div class="card-body" style="background-color: transparent !important;">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4 class="card-title" id="total-value">£0</h4>
-                        <p class="card-text">Total Value</p>
+                        <h4 class="card-title" id="total-value" style="color: #ffffff !important; font-weight: bold;">£0</h4>
+                        <p class="card-text" style="color: #ffffff !important; font-weight: bold;">Total Value</p>
                     </div>
                     <div class="align-self-center">
-                        <i class="fas fa-pound-sign fa-2x"></i>
+                        <i class="fas fa-pound-sign fa-2x" style="color: #ffffff !important;"></i>
                     </div>
                 </div>
             </div>
@@ -55,15 +55,15 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body">
+        <div class="card" style="background-color: #0dcaf0; color: #000000; border: 2px solid #0aa2c0;">
+            <div class="card-body" style="background-color: transparent !important;">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4 class="card-title" id="total-earned">£0</h4>
-                        <p class="card-text">Earned</p>
+                        <h4 class="card-title" id="total-earned" style="color: #000000;">£0</h4>
+                        <p class="card-text" style="color: #000000;">Earned</p>
                     </div>
                     <div class="align-self-center">
-                        <i class="fas fa-chart-line fa-2x"></i>
+                        <i class="fas fa-chart-line fa-2x" style="color: #000000;"></i>
                     </div>
                 </div>
             </div>
@@ -71,15 +71,15 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body">
+        <div class="card" style="background-color: #ffc107; color: #000000; border: 2px solid #cc9a00;">
+            <div class="card-body" style="background-color: transparent !important;">
                 <div class="d-flex justify-content-between">
                     <div>
-                        <h4 class="card-title" id="total-remaining">£0</h4>
-                        <p class="card-text">Remaining</p>
+                        <h4 class="card-title" id="total-remaining" style="color: #000000;">£0</h4>
+                        <p class="card-text" style="color: #000000;">Remaining</p>
                     </div>
                     <div class="align-self-center">
-                        <i class="fas fa-clock fa-2x"></i>
+                        <i class="fas fa-clock fa-2x" style="color: #000000;"></i>
                     </div>
                 </div>
             </div>
@@ -97,13 +97,17 @@
                     Your Contracts
                 </h5>
                 <div>
+                    <button class="btn btn-outline-secondary btn-sm me-2" onclick="toggleArchived()" id="show-archived-btn">
+                        <i class="fas fa-archive me-1"></i>
+                        Show Archived
+                    </button>
                     <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
                         <i class="fas fa-sync-alt me-1"></i>
                         Refresh
                     </button>
                 </div>
             </div>
-            <div class="card-body">
+            <div class="card-body" style="background-color: transparent !important;">
                 <!-- Loading State -->
                 <div id="loading-state" class="text-center py-5">
                     <div class="spinner-border text-primary" role="status">
@@ -123,9 +127,42 @@
                     </a>
                 </div>
                 
-                <!-- Contracts List -->
+                <!-- Active Contracts List -->
                 <div id="contracts-container">
-                    <!-- Contract cards will be dynamically inserted here -->
+                    <!-- Active contract cards will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Archived Contracts Section -->
+<div class="row mt-4" id="archived-section" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-archive me-2"></i>
+                    Archived Contracts
+                </h5>
+                <div>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="toggleArchived()">
+                        <i class="fas fa-eye-slash me-1"></i>
+                        Hide Archived
+                    </button>
+                </div>
+            </div>
+            <div class="card-body" style="background-color: transparent !important;">
+                <!-- Empty Archived State -->
+                <div id="empty-archived-state" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-archive fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No archived contracts</h4>
+                    <p class="text-muted">Archived contracts will appear here when you close them.</p>
+                </div>
+                
+                <!-- Archived Contracts List -->
+                <div id="archived-contracts-container">
+                    <!-- Archived contract cards will be dynamically inserted here -->
                 </div>
             </div>
         </div>

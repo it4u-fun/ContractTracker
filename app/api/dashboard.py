@@ -14,19 +14,23 @@ def dashboard():
         contracts = current_app.data_manager.get_all_contracts()
         settings = current_app.data_manager.get_settings()
         
-        # Calculate dashboard statistics
-        total_contracts = len(contracts)
-        total_value = sum(contract.total_contract_value for contract in contracts.values())
-        total_earned = sum(contract.earned_value for contract in contracts.values())
+        # Separate active and archived contracts
+        active_contracts = {k: v for k, v in contracts.items() if v.is_active()}
+        archived_contracts = {k: v for k, v in contracts.items() if v.is_archived()}
         
-        # Get contract summaries
-        contract_summaries = []
-        for key, contract in contracts.items():
+        # Calculate dashboard statistics (only for active contracts)
+        total_contracts = len(active_contracts)
+        total_value = sum(contract.total_contract_value for contract in active_contracts.values())
+        total_earned = sum(contract.earned_value for contract in active_contracts.values())
+        
+        # Get active contract summaries
+        active_contract_summaries = []
+        for key, contract in active_contracts.items():
             from ..services.validation_service import ValidationService
             validation_result = ValidationService.validate_contract(contract)
             health_score = ValidationService.get_contract_health_score(contract)
             
-            contract_summaries.append({
+            active_contract_summaries.append({
                 'key': key,
                 'staff_name': contract.staff_name,
                 'client_company': contract.client_company,
@@ -47,6 +51,35 @@ def dashboard():
                 'updated_at': contract.updated_at
             })
         
+        # Get archived contract summaries
+        archived_contract_summaries = []
+        for key, contract in archived_contracts.items():
+            from ..services.validation_service import ValidationService
+            validation_result = ValidationService.validate_contract(contract)
+            health_score = ValidationService.get_contract_health_score(contract)
+            
+            archived_contract_summaries.append({
+                'key': key,
+                'staff_name': contract.staff_name,
+                'client_company': contract.client_company,
+                'contract_name': contract.contract_name,
+                'start_date': contract.start_date,
+                'end_date': contract.end_date,
+                'total_days': contract.total_days,
+                'daily_rate': contract.daily_rate,
+                'working_days_count': contract.working_days_count,
+                'remaining_days': contract.remaining_working_days,
+                'is_balanced': contract.is_balanced,
+                'total_value': contract.total_contract_value,
+                'earned_value': contract.earned_value,
+                'progress_percentage': (contract.working_days_count / contract.total_days * 100) if contract.total_days > 0 else 0,
+                'health_score': health_score,
+                'validation': validation_result,
+                'status': contract.status.value,
+                'created_at': contract.created_at,
+                'updated_at': contract.updated_at
+            })
+        
         return jsonify({
             'success': True,
             'dashboard': {
@@ -54,7 +87,8 @@ def dashboard():
                 'total_value': total_value,
                 'total_earned': total_earned,
                 'total_remaining': total_value - total_earned,
-                'contracts': contract_summaries
+                'contracts': active_contract_summaries,
+                'archived_contracts': archived_contract_summaries
             },
             'settings': settings.to_dict()
         })

@@ -8,13 +8,14 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 
 class DayStatus(Enum):
-    """Enumeration of possible day statuses."""
+    """Enumeration of possible day statuses (restricted to two states)."""
     WORKING = 'working'
-    BANK_HOLIDAY = 'bank_holiday'
     HOLIDAY = 'holiday'
-    IN_LIEU = 'in_lieu'
-    ON_CALL = 'on_call'
-    NOT_APPLICABLE = 'not_applicable'
+
+class ContractStatus(Enum):
+    """Enumeration of possible contract statuses."""
+    ACTIVE = 'active'
+    ARCHIVED = 'archived'
 
 @dataclass
 class DayAllocation:
@@ -61,6 +62,9 @@ class Contract:
     # Day allocations
     days: Dict[str, DayAllocation] = None
     
+    # Contract status
+    status: ContractStatus = ContractStatus.ACTIVE
+    
     # Metadata
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
@@ -69,38 +73,35 @@ class Contract:
         """Initialize after dataclass creation."""
         if self.days is None:
             self.days = {}
-        
-        # Sanitize all string inputs
-        self._sanitize_inputs()
-        
+
+        # Validate data (sanitization is done at API level)
+        self._validate_inputs()
+
         now = datetime.now().isoformat()
         if self.created_at is None:
             self.created_at = now
         self.updated_at = now
-    
-    def _sanitize_inputs(self):
-        """Sanitize all input data."""
-        from ..utils.sanitization import DataSanitizer
-        
-        # Sanitize string fields
-        self.staff_name = DataSanitizer.sanitize_string(self.staff_name, 100)
-        self.client_company = DataSanitizer.sanitize_string(self.client_company, 100)
-        self.contract_name = DataSanitizer.sanitize_string(self.contract_name, 200)
-        
+
+    def _validate_inputs(self):
+        """Validate input data (sanitization done at API level)."""
         # Validate dates
-        self.start_date = DataSanitizer.sanitize_date(self.start_date)
-        self.end_date = DataSanitizer.sanitize_date(self.end_date)
-        
-        # Validate date order
         if self.start_date and self.end_date:
-            start_dt = datetime.strptime(self.start_date, '%Y-%m-%d')
-            end_dt = datetime.strptime(self.end_date, '%Y-%m-%d')
-            if end_dt <= start_dt:
-                raise ValueError("End date must be after start date")
-        
+            try:
+                start_dt = datetime.strptime(self.start_date, '%Y-%m-%d')
+                end_dt = datetime.strptime(self.end_date, '%Y-%m-%d')
+                if end_dt <= start_dt:
+                    raise ValueError("End date must be after start date")
+            except ValueError as e:
+                if "time data" in str(e):
+                    raise ValueError("Invalid date format. Use YYYY-MM-DD")
+                raise e
+
         # Validate integers
-        self.total_days = DataSanitizer.sanitize_integer(self.total_days, min_value=1, max_value=365)
-        self.daily_rate = DataSanitizer.sanitize_integer(self.daily_rate, min_value=0, max_value=10000)
+        if self.total_days is not None and (self.total_days < 1 or self.total_days > 365):
+            raise ValueError("Total days must be between 1 and 365")
+        
+        if self.daily_rate is not None and (self.daily_rate < 0 or self.daily_rate > 10000):
+            raise ValueError("Daily rate must be between 0 and 10000")
     
     @property
     def contract_key(self) -> str:
@@ -245,6 +246,24 @@ class Contract:
         
         return violations
     
+    def archive(self):
+        """Archive this contract."""
+        self.status = ContractStatus.ARCHIVED
+        self.updated_at = datetime.now().isoformat()
+    
+    def unarchive(self):
+        """Unarchive this contract (make it active)."""
+        self.status = ContractStatus.ACTIVE
+        self.updated_at = datetime.now().isoformat()
+    
+    def is_archived(self) -> bool:
+        """Check if contract is archived."""
+        return self.status == ContractStatus.ARCHIVED
+    
+    def is_active(self) -> bool:
+        """Check if contract is active."""
+        return self.status == ContractStatus.ACTIVE
+    
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
@@ -256,6 +275,7 @@ class Contract:
             'total_days': self.total_days,
             'daily_rate': self.daily_rate,
             'days': {date: day.to_dict() for date, day in self.days.items()},
+            'status': self.status.value,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
@@ -278,6 +298,7 @@ class Contract:
             total_days=data['total_days'],
             daily_rate=data['daily_rate'],
             days=days,
+            status=ContractStatus(data.get('status', 'active')),
             created_at=data.get('created_at'),
             updated_at=data.get('updated_at')
         )

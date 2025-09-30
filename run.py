@@ -48,6 +48,11 @@ def create_web_app():
         """Settings page."""
         return render_template('settings/index.html')
     
+    @app.route('/learn')
+    def learn():
+        """Learning/Onboarding page for repo usage and evolution plan."""
+        return render_template('learn/index.html')
+    
     @app.route('/api')
     def api_info():
         """API information page."""

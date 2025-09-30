@@ -14,7 +14,9 @@
 /* Global Styles */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
+    background-color: #e9ecef;
+    font-size: 16px;
+    line-height: 1.6;
 }
 
 /* Navigation */
@@ -34,145 +36,246 @@ body {
 
 /* Cards */
 .card {
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border: 2px solid #dee2e6;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
     transition: box-shadow 0.15s ease-in-out;
+    background-color: #ffffff;
+    margin-bottom: 1.5rem;
 }
 
 .card:hover {
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.25);
+    border-color: #adb5bd;
 }
 
 .card-header {
-    background-color: #fff;
-    border-bottom: 1px solid #dee2e6;
-    font-weight: 600;
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 1rem 1.25rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+    background-color: #ffffff;
 }
 
 /* Contract Cards */
 .contract-card {
     transition: transform 0.2s ease-in-out;
+    border: 2px solid #dee2e6;
+    background-color: #ffffff;
 }
 
 .contract-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px);
+    border-color: #0d6efd;
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.3);
+}
+
+.contract-card .card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #212529;
+}
+
+.contract-card .card-body p {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .contract-status .badge {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 700;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.contract-status .badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000000 !important;
+    border-color: #000000;
+}
+
+.contract-status .badge.bg-success {
+    background-color: #198754 !important;
+    color: #ffffff !important;
 }
 
 .health-score .badge {
-    font-size: 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.health-score .badge.bg-success {
+    background-color: #198754 !important;
+    color: #ffffff !important;
+    border-color: #000000;
+}
+
+.health-score .badge.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000000 !important;
+    border-color: #000000;
+}
+
+.health-score .badge.bg-danger {
+    background-color: #dc3545 !important;
+    color: #ffffff !important;
+    border-color: #000000;
 }
 
 /* Progress Bars */
 .progress {
     background-color: #e9ecef;
+    height: 12px;
+    border: 1px solid #dee2e6;
 }
 
 .progress-bar {
     transition: width 0.6s ease;
+    font-weight: 600;
 }
 
 /* Calendar Styles */
 .calendar-month {
-    margin-bottom: 2rem;
+    margin-bottom: 2.5rem;
 }
 
 .calendar-month h5 {
     color: var(--primary-color);
-    font-weight: 600;
-    margin-bottom: 1rem;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
     text-align: center;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 .calendar-grid {
-    border: 1px solid #dee2e6;
-    border-radius: 0.375rem;
+    border: 2px solid #dee2e6;
+    border-radius: 0.5rem;
     overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
 }
 
 .calendar-header {
-    background-color: var(--light-color);
-    font-weight: 600;
+    background-color: #f8f9fa;
+    font-weight: 700;
+    font-size: 1.1rem;
     text-align: center;
-    padding: 0.75rem 0.5rem;
-    border-bottom: 1px solid #dee2e6;
+    padding: 1rem 0.75rem;
+    border-bottom: 2px solid #dee2e6;
+    color: #495057;
 }
 
 .calendar-day {
-    min-height: 60px;
+    min-height: 70px;
     border: 1px solid #dee2e6;
     cursor: pointer;
     transition: all 0.2s ease;
     position: relative;
-    padding: 0.25rem;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    background-color: #ffffff;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Suggested working day overlay */
+.calendar-day .suggestion-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0d6efd 0%, #20c997 100%);
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+    z-index: 5;
 }
 
 .calendar-day:hover {
-    background-color: rgba(13, 110, 253, 0.1);
-    transform: scale(1.02);
+    background-color: rgba(13, 110, 253, 0.15);
+    transform: scale(1.03);
+    border-color: #0d6efd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .calendar-day.weekend {
     background-color: #f8f9fa;
-    opacity: 0.7;
+    opacity: 0.8;
+    border-color: #adb5bd;
 }
 
 .calendar-day.outside-period {
     background-color: #e9ecef;
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
+    border-color: #ced4da;
 }
 
 /* Day Status Colors */
 .calendar-day.working {
-    background-color: #d4edda;
-    border-color: #c3e6cb;
+    background-color: #d1e7dd;
+    border-color: #a3d9a4;
+    border-width: 2px;
+    font-weight: 700;
 }
 
 .calendar-day.bank_holiday {
     background-color: #fff3cd;
-    border-color: #ffeaa7;
+    border-color: #ffda6a;
+    border-width: 2px;
+    font-weight: 700;
 }
 
 .calendar-day.holiday {
     background-color: #f8d7da;
-    border-color: #f5c6cb;
+    border-color: #f1aeb5;
+    border-width: 2px;
+    font-weight: 700;
 }
 
 .calendar-day.in_lieu {
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
+    background-color: #cff4fc;
+    border-color: #9eeaf9;
+    border-width: 2px;
+    font-weight: 700;
 }
 
 .calendar-day.on_call {
     background-color: #e2e3e5;
-    border-color: #d6d8db;
+    border-color: #adb5bd;
+    border-width: 2px;
+    font-weight: 700;
 }
 
 .calendar-day.not_applicable {
     background-color: #f8f9fa;
     border-color: #dee2e6;
+    border-width: 2px;
 }
 
 /* Day Status Legend */
 .day-legend-item {
     display: flex;
     align-items: center;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+    font-weight: 500;
 }
 
 .day-status {
-    width: 20px;
-    height: 20px;
-    border-radius: 3px;
-    margin-right: 0.5rem;
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    margin-right: 0.75rem;
+    border: 2px solid rgba(0, 0, 0, 0.2);
 }
 
 .day-status.working {
@@ -199,47 +302,214 @@ body {
     background-color: #f8f9fa;
 }
 
-/* Dashboard Stats Cards */
-.dashboard-stats .card {
-    border-left: 4px solid;
+/* Calendar Data Source Flags */
+.data-source-flag {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.7rem;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #dee2e6;
 }
 
-.dashboard-stats .card.bg-primary {
-    border-left-color: #0a58ca;
+.data-source-flag.bank_holiday {
+    background: rgba(255, 193, 7, 0.9);
+    border-color: #ffc107;
 }
 
-.dashboard-stats .card.bg-success {
-    border-left-color: #146c43;
+.data-source-flag.school_holiday {
+    background: rgba(13, 202, 240, 0.9);
+    border-color: #0dcaf0;
 }
 
-.dashboard-stats .card.bg-info {
-    border-left-color: #0aa2c0;
+/* Outside Period Styling */
+.calendar-day.outside-period {
+    background-color: #f8f9fa !important;
+    color: #6c757d !important;
+    border-color: #dee2e6 !important;
+    opacity: 0.6;
 }
 
-.dashboard-stats .card.bg-warning {
-    border-left-color: #cc9a00;
+.calendar-day.outside-period .day-number {
+    color: #6c757d !important;
+}
+
+.calendar-day.non-clickable {
+    cursor: not-allowed !important;
+}
+
+.calendar-day.non-clickable:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.outside-period-indicator {
+    position: absolute;
+    bottom: 2px;
+    left: 2px;
+    right: 2px;
+    font-size: 0.6rem;
+    color: #6c757d;
+    text-align: center;
+    line-height: 1;
+    background: rgba(248, 249, 250, 0.9);
+    border-radius: 2px;
+    padding: 1px;
+}
+
+/* Data Source Legend Styling */
+.data-source-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.data-source-legend-item .data-source-flag {
+    position: static;
+    flex-shrink: 0;
+}
+
+.data-source-legend-item .outside-period-indicator {
+    position: static;
+    flex-shrink: 0;
+    margin: 0;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 2px;
+    padding: 2px 4px;
+    font-size: 0.6rem;
+    color: #6c757d;
+}
+
+/* Archived Contracts Styling */
+.contract-card.archived {
+    opacity: 0.7;
+    border-color: #6c757d !important;
+    background-color: #f8f9fa !important;
+}
+
+.contract-card.archived .card-header {
+    background-color: #e9ecef !important;
+    border-bottom-color: #6c757d !important;
+}
+
+.contract-card.archived .card-title {
+    color: #6c757d !important;
+}
+
+.contract-card.archived .card-text {
+    color: #6c757d !important;
+}
+
+/* Dashboard Stats Cards - Force proper colors */
+.card.bg-primary {
+    background-color: #0d6efd !important;
+    color: #ffffff !important;
+    border: 2px solid #0a58ca !important;
+}
+
+.card.bg-success {
+    background-color: #198754 !important;
+    color: #ffffff !important;
+    border: 2px solid #146c43 !important;
+}
+
+.card.bg-info {
+    background-color: #0dcaf0 !important;
+    color: #000000 !important;
+    border: 2px solid #0aa2c0 !important;
+}
+
+.card.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000000 !important;
+    border: 2px solid #cc9a00 !important;
+}
+
+/* Force all text in colored cards to be visible */
+.card.bg-primary *,
+.card.bg-success *,
+.card.bg-info *,
+.card.bg-warning * {
+    color: inherit !important;
+}
+
+.card.bg-primary .card-title,
+.card.bg-primary .card-text,
+.card.bg-primary .fas {
+    color: #ffffff !important;
+}
+
+.card.bg-success .card-title,
+.card.bg-success .card-text,
+.card.bg-success .fas {
+    color: #ffffff !important;
+}
+
+.card.bg-info .card-title,
+.card.bg-info .card-text,
+.card.bg-info .fas {
+    color: #000000 !important;
+}
+
+.card.bg-warning .card-title,
+.card.bg-warning .card-text,
+.card.bg-warning .fas {
+    color: #000000 !important;
 }
 
 /* Form Styles */
 .form-control:focus,
 .form-select:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    box-shadow: 0 0 0 0.3rem rgba(13, 110, 253, 0.25);
+    border-width: 2px;
+}
+
+.form-control,
+.form-select {
+    border: 2px solid #dee2e6;
+    padding: 0.75rem;
+    font-size: 1rem;
 }
 
 .form-label {
-    font-weight: 600;
+    font-weight: 700;
     color: var(--dark-color);
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-text {
+    font-size: 1rem;
+    font-weight: 500;
 }
 
 /* Button Styles */
 .btn {
-    font-weight: 500;
+    font-weight: 600;
+    font-size: 1rem;
+    padding: 0.75rem 1.25rem;
     transition: all 0.2s ease;
+    border-width: 2px;
 }
 
 .btn:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-sm {
+    font-size: 0.95rem;
+    padding: 0.5rem 1rem;
 }
 
 .btn-primary {
@@ -317,37 +587,46 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
     .calendar-day {
-        min-height: 45px;
-        font-size: 0.8rem;
+        min-height: 60px;
+        font-size: 0.9rem;
     }
     
     .contract-card .card-body {
-        padding: 1rem;
+        padding: 1.25rem;
     }
     
     .dashboard-stats .card-body {
-        padding: 1rem;
+        padding: 1.25rem;
     }
     
     .navbar-brand {
-        font-size: 1.25rem;
+        font-size: 1.4rem;
+    }
+    
+    .card-header {
+        font-size: 1rem;
     }
 }
 
 @media (max-width: 576px) {
     .calendar-day {
-        min-height: 35px;
-        font-size: 0.7rem;
-        padding: 0.1rem;
+        min-height: 55px;
+        font-size: 0.85rem;
+        padding: 0.4rem;
     }
     
     .day-legend-item {
-        font-size: 0.8rem;
+        font-size: 1rem;
     }
     
     .day-status {
-        width: 16px;
-        height: 16px;
+        width: 20px;
+        height: 20px;
+    }
+    
+    .btn {
+        font-size: 0.95rem;
+        padding: 0.6rem 1rem;
     }
 }
 
@@ -382,6 +661,51 @@ body {
     }
 }
 
+/* Accessibility Improvements */
+.high-contrast {
+    /* Enhanced contrast for better visibility */
+    background-color: #ffffff;
+    color: #000000;
+    border: 2px solid #000000;
+}
+
+.text-large {
+    font-size: 1.2rem;
+    line-height: 1.8;
+}
+
+.text-extra-large {
+    font-size: 1.4rem;
+    line-height: 2;
+}
+
+/* Enhanced focus indicators */
+.btn:focus,
+.form-control:focus,
+.form-select:focus,
+.nav-link:focus {
+    outline: 3px solid #0d6efd;
+    outline-offset: 2px;
+    box-shadow: 0 0 0 0.3rem rgba(13, 110, 253, 0.5);
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card {
+        border: 3px solid #000000;
+        background-color: #ffffff;
+    }
+    
+    .btn {
+        border-width: 3px;
+    }
+    
+    .calendar-day {
+        border-width: 2px;
+        border-color: #000000;
+    }
+}
+
 /* Print Styles */
 @media print {
     .navbar,
@@ -392,11 +716,21 @@ body {
     
     .card {
         box-shadow: none !important;
-        border: 1px solid #dee2e6 !important;
+        border: 2px solid #000000 !important;
+        background-color: white !important;
     }
     
     .calendar-day {
-        border: 1px solid #000 !important;
+        border: 2px solid #000000 !important;
         background-color: white !important;
+    }
+    
+    body {
+        font-size: 14pt;
+        line-height: 1.5;
+    }
+    
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: bold;
     }
 }

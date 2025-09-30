@@ -150,6 +150,13 @@ def update_contract(contract_key: str):
                 'error': 'Contract not found'
             }), 404
         
+        # Check if contract is archived
+        if contract.is_archived():
+            return jsonify({
+                'success': False,
+                'error': 'Cannot modify archived contract'
+            }), 403
+        
         data = request.get_json()
         
         # Update contract fields
@@ -220,6 +227,13 @@ def update_day_status(contract_key: str):
                 'error': 'Contract not found'
             }), 404
         
+        # Check if contract is archived
+        if contract.is_archived():
+            return jsonify({
+                'success': False,
+                'error': 'Cannot modify archived contract'
+            }), 403
+        
         data = request.get_json()
         
         if not data:
@@ -237,7 +251,7 @@ def update_day_status(contract_key: str):
                 'error': f'Data validation error: {str(e)}'
             }), 400
         
-        # Validate status
+        # Validate status (restricted to working/holiday)
         try:
             status = DayStatus(sanitized_data['status'])
         except ValueError:
@@ -320,8 +334,16 @@ def apply_suggestions(contract_key: str):
                 'error': 'Contract not found'
             }), 404
         
+        # Check if contract is archived
+        if contract.is_archived():
+            return jsonify({
+                'success': False,
+                'error': 'Cannot modify archived contract'
+            }), 403
+        
         data = request.get_json()
         suggested_dates = data.get('suggested_dates', [])
+        notes_by_date = data.get('notes_by_date', {})
         
         if not suggested_dates:
             return jsonify({
@@ -329,14 +351,28 @@ def apply_suggestions(contract_key: str):
                 'error': 'No suggested dates provided'
             }), 400
         
+        # Validate suggested dates are within contract period
+        from ..services.calendar_service import CalendarService
+        valid_range = set(CalendarService.get_date_range(contract.start_date, contract.end_date))
+        filtered_dates = [d for d in suggested_dates if d in valid_range]
+        if len(filtered_dates) != len(suggested_dates):
+            # If any dates are out of range, return a validation error
+            return jsonify({
+                'success': False,
+                'error': 'One or more suggested dates are outside the contract period'
+            }), 400
+
         # Clear existing working days
         for date_str, day_allocation in list(contract.days.items()):
             if day_allocation.status == DayStatus.WORKING:
                 del contract.days[date_str]
         
-        # Apply suggested days
-        for date_str in suggested_dates:
-            contract.set_day_status(date_str, DayStatus.WORKING)
+        # Apply suggested days with optional notes
+        for date_str in filtered_dates:
+            note = None
+            if isinstance(notes_by_date, dict):
+                note = notes_by_date.get(date_str)
+            contract.set_day_status(date_str, DayStatus.WORKING, note)
         
         # Save contract
         if current_app.data_manager.save_contract(contract):
@@ -381,6 +417,80 @@ def validate_contract(contract_key: str):
             'validation': validation_result,
             'health_score': health_score
         })
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@contracts_bp.route('/<contract_key>/archive', methods=['POST'])
+def archive_contract(contract_key: str):
+    """Archive a contract."""
+    try:
+        # Sanitize contract key
+        contract_key = DataSanitizer.sanitize_string(contract_key)
+        
+        contract = current_app.data_manager.get_contract(contract_key)
+        
+        if not contract:
+            return jsonify({
+                'success': False,
+                'error': 'Contract not found'
+            }), 404
+        
+        # Archive the contract
+        contract.archive()
+        
+        # Save the updated contract
+        if current_app.data_manager.save_contract(contract):
+            return jsonify({
+                'success': True,
+                'message': 'Contract archived successfully',
+                'contract': contract.to_dict()
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to save archived contract'
+            }), 500
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@contracts_bp.route('/<contract_key>/unarchive', methods=['POST'])
+def unarchive_contract(contract_key: str):
+    """Unarchive a contract."""
+    try:
+        # Sanitize contract key
+        contract_key = DataSanitizer.sanitize_string(contract_key)
+        
+        contract = current_app.data_manager.get_contract(contract_key)
+        
+        if not contract:
+            return jsonify({
+                'success': False,
+                'error': 'Contract not found'
+            }), 404
+        
+        # Unarchive the contract
+        contract.unarchive()
+        
+        # Save the updated contract
+        if current_app.data_manager.save_contract(contract):
+            return jsonify({
+                'success': True,
+                'message': 'Contract unarchived successfully',
+                'contract': contract.to_dict()
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to save unarchived contract'
+            }), 500
     
     except Exception as e:
         return jsonify({

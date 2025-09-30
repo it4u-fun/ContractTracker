@@ -277,7 +277,13 @@ class Contract:
             'days': {date: day.to_dict() for date, day in self.days.items()},
             'status': self.status.value,
             'created_at': self.created_at,
-            'updated_at': self.updated_at
+            'updated_at': self.updated_at,
+            # Computed fields for UI convenience
+            'working_days_count': self.working_days_count,
+            'remaining_working_days': self.remaining_working_days,
+            'is_balanced': self.is_balanced,
+            'total_value': self.total_contract_value,
+            'earned_value': self.earned_value
         }
     
     @classmethod

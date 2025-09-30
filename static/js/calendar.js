@@ -43,8 +43,9 @@ class ContractCalendar {
             await this.loadDataSourceFlags();
             
             // Generate calendar months
-            const startDate = new Date(this.contract.start_date);
-            const endDate = new Date(this.contract.end_date);
+            // Parse dates in local timezone to avoid UTC conversion issues
+            const startDate = new Date(this.contract.start_date + 'T00:00:00');
+            const endDate = new Date(this.contract.end_date + 'T00:00:00');
             
             this.calendarMonths = this.generateCalendarMonths(startDate, endDate);
         } else {

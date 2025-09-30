@@ -51,7 +51,6 @@ class Contract:
     """Represents a contract with all its data and business logic."""
     
     # Contract identification
-    contract_id: Optional[str] = None
     staff_name: str
     client_company: str
     contract_name: str
@@ -61,6 +60,8 @@ class Contract:
     end_date: str    # YYYY-MM-DD format
     total_days: int
     daily_rate: int
+    # Stable unique identifier (assigned on first load/save)
+    contract_id: Optional[str] = None
     
     # Day allocations
     days: Dict[str, DayAllocation] = None

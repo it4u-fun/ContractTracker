@@ -204,8 +204,8 @@ async function loadContractDetails() {
         
         if (data.success) {
             const contract = data.contract;
-            // Track the current key in case of rename
-            window.__currentContractKey = data.contract.contract_key || contractKey;
+            // Always use original URL key to reference this contract
+            window.__currentContractKey = contractKey;
             
             // Update page title and info
             document.title = `${contract.client_company} - ${contract.contract_name} - Contract Tracker`;
@@ -253,7 +253,7 @@ async function loadContractDetails() {
             }
             
             // Update calendar link
-            document.getElementById('calendar-link').href = `/contracts/${window.__currentContractKey}/calendar`;
+            document.getElementById('calendar-link').href = `/contracts/${contractKey}/calendar`;
             
             // Display validation results
             displayValidation(data.validation);

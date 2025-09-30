@@ -113,6 +113,10 @@
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2 d-md-flex">
+                    <button class="btn btn-outline-secondary" onclick="openEditContract()">
+                        <i class="fas fa-pen me-2"></i>
+                        Edit Contract
+                    </button>
                     <button class="btn btn-primary" onclick="goToCalendar()">
                         <i class="fas fa-calendar me-2"></i>
                         Open Calendar
@@ -137,6 +141,50 @@
 
 <!-- Include flash messages component -->
 {% include 'components/flash_messages.html' %}
+
+<!-- Edit Contract Modal -->
+<div class="modal fade" id="editContractModal" tabindex="-1" aria-labelledby="editContractLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editContractLabel">Edit Contract</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="edit-contract-form">
+          <div class="mb-3">
+            <label for="edit-contract-name" class="form-label">Contract Name</label>
+            <input type="text" class="form-control" id="edit-contract-name" maxlength="200">
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit-start-date" class="form-label">Start Date</label>
+              <input type="date" class="form-control" id="edit-start-date">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit-end-date" class="form-label">End Date</label>
+              <input type="date" class="form-control" id="edit-end-date">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="edit-total-days" class="form-label">Total Days</label>
+              <input type="number" class="form-control" id="edit-total-days" min="1" max="365">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="edit-daily-rate" class="form-label">Daily Rate (£)</label>
+              <input type="number" class="form-control" id="edit-daily-rate" min="0" max="10000">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveContractEdits()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+  </div>
 {% endblock %}
 
 {% block extra_js %}
@@ -207,6 +255,18 @@ async function loadContractDetails() {
             
             // Display validation results
             displayValidation(data.validation);
+
+            // Pre-fill edit form fields
+            const nameInput = document.getElementById('edit-contract-name');
+            const startInput = document.getElementById('edit-start-date');
+            const endInput = document.getElementById('edit-end-date');
+            const totalDaysInput = document.getElementById('edit-total-days');
+            const dailyRateInput = document.getElementById('edit-daily-rate');
+            if (nameInput) nameInput.value = contract.contract_name;
+            if (startInput) startInput.value = contract.start_date;
+            if (endInput) endInput.value = contract.end_date;
+            if (totalDaysInput) totalDaysInput.value = contract.total_days;
+            if (dailyRateInput) dailyRateInput.value = contract.daily_rate;
             
         } else {
             showFlashMessage('Failed to load contract details', 'danger');
@@ -269,6 +329,48 @@ function displayValidation(validation) {
 
 function goToCalendar() {
     window.location.href = `/contracts/${contractKey}/calendar`;
+}
+
+function openEditContract() {
+    const modalEl = document.getElementById('editContractModal');
+    const modal = new bootstrap.Modal(modalEl);
+    modal.show();
+}
+
+async function saveContractEdits() {
+    try {
+        const nameInput = document.getElementById('edit-contract-name');
+        const startInput = document.getElementById('edit-start-date');
+        const endInput = document.getElementById('edit-end-date');
+        const totalDaysInput = document.getElementById('edit-total-days');
+        const dailyRateInput = document.getElementById('edit-daily-rate');
+
+        const payload = {};
+        if (nameInput && nameInput.value) payload.contract_name = nameInput.value;
+        if (startInput && startInput.value) payload.start_date = startInput.value;
+        if (endInput && endInput.value) payload.end_date = endInput.value;
+        if (totalDaysInput && totalDaysInput.value) payload.total_days = parseInt(totalDaysInput.value, 10);
+        if (dailyRateInput && dailyRateInput.value) payload.daily_rate = parseInt(dailyRateInput.value, 10);
+
+        const response = await fetch(`/api/contracts/${contractKey}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+
+        if (response.ok && data.success) {
+            showFlashMessage('Contract updated successfully', 'success');
+            // Hide modal and refresh the details in-place
+            bootstrap.Modal.getInstance(document.getElementById('editContractModal')).hide();
+            await loadContractDetails();
+        } else {
+            throw new Error(data.error || 'Failed to update contract');
+        }
+    } catch (err) {
+        console.error('Error updating contract:', err);
+        showFlashMessage(err.message || 'Error updating contract', 'danger');
+    }
 }
 
 async function showSuggestions() {

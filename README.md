@@ -324,6 +324,15 @@ For support or questions:
 
 ## Recent Changes
 
+### v1.3.0 - Custom Holidays Management
+- **Added**: Custom holidays management system for user-defined holiday periods
+- **Added**: EBRD Christmas closure and office shutdown support
+- **Added**: Holiday types: Bank Holiday, Office Closure, Personal Holiday
+- **Added**: Full CRUD operations for custom holidays via Settings page
+- **Added**: Calendar integration showing custom holidays with appropriate icons
+- **Added**: API endpoints for custom holidays management
+- **Enhanced**: Data source system with custom holidays toggle
+
 ### v1.2.0 - Enhanced Contract Management
 - **Fixed**: Calendar day-of-week calculations now correctly display Monday as first day of week
 - **Fixed**: Timezone-safe date handling prevents date shifting issues

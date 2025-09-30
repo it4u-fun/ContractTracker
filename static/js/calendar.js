@@ -76,6 +76,14 @@ class ContractCalendar {
                         this.contract.end_date
                     );
                 }
+                
+                // Load Custom Holidays if enabled
+                if (settings.enabled_data_sources.custom_holidays) {
+                    this.dataSourceFlags.custom_holidays = await this.getCustomHolidays(
+                        this.contract.start_date, 
+                        this.contract.end_date
+                    );
+                }
             }
         } catch (error) {
             console.warn('Failed to load data source flags:', error);
@@ -130,6 +138,46 @@ class ContractCalendar {
         // Placeholder for PraeWood School holidays
         // This would be populated from actual school calendar data
         return [];
+    }
+    
+    async getCustomHolidays(startDate, endDate) {
+        try {
+            const response = await Utils.apiRequest(`/api/custom-holidays/range?start_date=${startDate}&end_date=${endDate}`);
+            
+            if (response.success) {
+                // Convert holidays to date flags
+                const holidayFlags = {};
+                response.holidays.forEach(holiday => {
+                    const dates = this.getHolidayDates(holiday.start_date, holiday.end_date);
+                    dates.forEach(date => {
+                        holidayFlags[date] = {
+                            type: 'custom_holiday',
+                            name: holiday.name,
+                            description: holiday.description,
+                            holiday_type: holiday.holiday_type
+                        };
+                    });
+                });
+                return holidayFlags;
+            }
+        } catch (error) {
+            console.warn('Failed to load custom holidays:', error);
+        }
+        return {};
+    }
+    
+    getHolidayDates(startDate, endDate) {
+        const dates = [];
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        const current = new Date(start);
+        while (current <= end) {
+            dates.push(current.toISOString().split('T')[0]);
+            current.setDate(current.getDate() + 1);
+        }
+        
+        return dates;
     }
     
     calculateEaster(year) {
@@ -191,9 +239,32 @@ class ContractCalendar {
                     icon: '🎓'
                 });
             }
+            
+            // Check Custom Holidays
+            if (this.dataSourceFlags.custom_holidays && 
+                this.dataSourceFlags.custom_holidays[dateString]) {
+                const holiday = this.dataSourceFlags.custom_holidays[dateString];
+                const icon = this.getCustomHolidayIcon(holiday.holiday_type);
+                flags.push({
+                    type: 'custom_holiday',
+                    label: holiday.name,
+                    icon: icon,
+                    description: holiday.description,
+                    holiday_type: holiday.holiday_type
+                });
+            }
         }
         
         return flags;
+    }
+    
+    getCustomHolidayIcon(holidayType) {
+        const icons = {
+            'bank_holiday': '🏛️',
+            'office_closure': '🚫',
+            'personal_holiday': '🏖️'
+        };
+        return icons[holidayType] || '📅';
     }
 
     generateCalendarMonths(startDate, endDate) {
@@ -444,7 +515,8 @@ class ContractCalendar {
         if (this.dataSourceFlags) {
             // Check if any data sources have dates
             if ((this.dataSourceFlags.uk_bank_holidays && this.dataSourceFlags.uk_bank_holidays.length > 0) ||
-                (this.dataSourceFlags.school_holidays && this.dataSourceFlags.school_holidays.length > 0)) {
+                (this.dataSourceFlags.school_holidays && this.dataSourceFlags.school_holidays.length > 0) ||
+                (this.dataSourceFlags.custom_holidays && Object.keys(this.dataSourceFlags.custom_holidays).length > 0)) {
                 hasFlags = true;
             }
         }

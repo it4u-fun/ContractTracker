@@ -252,6 +252,117 @@ GET /api/contracts/{contract_key}/validate
 }
 ```
 
+### Custom Holidays
+
+#### Get All Custom Holidays
+**GET** `/api/custom-holidays`
+
+Retrieves all custom holidays.
+
+**Response:**
+```json
+{
+  "success": true,
+  "holidays": [
+    {
+      "holiday_id": "9f1d9f13-fe02-4b72-8cd3-db6fab9e5593",
+      "name": "EBRD Christmas Closure",
+      "description": "EBRD office closure for Christmas and New Year period",
+      "start_date": "2025-12-23",
+      "end_date": "2026-01-02",
+      "holiday_type": "bank_holiday",
+      "created_at": "2025-09-30T21:16:40.146760",
+      "updated_at": "2025-09-30T21:16:58.944736"
+    }
+  ]
+}
+```
+
+#### Add Custom Holiday
+**POST** `/api/custom-holidays`
+
+Creates a new custom holiday.
+
+**Request Body:**
+```json
+{
+  "name": "EBRD Christmas Closure",
+  "description": "EBRD office closure for Christmas and New Year period",
+  "start_date": "2025-12-23",
+  "end_date": "2026-01-02",
+  "holiday_type": "bank_holiday"
+}
+```
+
+**Holiday Types:**
+- `bank_holiday`: Bank Holiday / Office Shut
+- `office_closure`: Office Closure
+- `personal_holiday`: Personal Holiday
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Holiday added successfully"
+}
+```
+
+#### Update Custom Holiday
+**PUT** `/api/custom-holidays/{holiday_id}`
+
+Updates an existing custom holiday.
+
+**Request Body:** Same as POST request
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Holiday updated successfully"
+}
+```
+
+#### Delete Custom Holiday
+**DELETE** `/api/custom-holidays/{holiday_id}`
+
+Deletes a custom holiday.
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Holiday deleted successfully"
+}
+```
+
+#### Get Holidays in Date Range
+**GET** `/api/custom-holidays/range?start_date=2025-12-01&end_date=2026-01-31`
+
+Retrieves custom holidays within a specific date range.
+
+**Query Parameters:**
+- `start_date` (required): Start date in YYYY-MM-DD format
+- `end_date` (required): End date in YYYY-MM-DD format
+
+**Response:**
+```json
+{
+  "success": true,
+  "holidays": [
+    {
+      "holiday_id": "9f1d9f13-fe02-4b72-8cd3-db6fab9e5593",
+      "name": "EBRD Christmas Closure",
+      "description": "EBRD office closure for Christmas and New Year period",
+      "start_date": "2025-12-23",
+      "end_date": "2026-01-02",
+      "holiday_type": "bank_holiday",
+      "created_at": "2025-09-30T21:16:40.146760",
+      "updated_at": "2025-09-30T21:16:58.944736"
+    }
+  ]
+}
+```
+
 ### Dashboard
 
 #### Get Dashboard Data

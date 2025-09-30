@@ -35,7 +35,8 @@ class ApplicationSettings:
         if self.enabled_data_sources is None:
             self.enabled_data_sources = {
                 'uk_bank_holidays': True,
-                'praewood_school': True
+                'praewood_school': True,
+                'custom_holidays': True
             }
         
         now = datetime.now().isoformat()
@@ -104,7 +105,8 @@ class ApplicationSettings:
             show_weekends=data.get('show_weekends', True),
             enabled_data_sources=data.get('enabled_data_sources', {
                 'uk_bank_holidays': True,
-                'praewood_school': True
+                'praewood_school': True,
+                'custom_holidays': True
             }),
             created_at=data.get('created_at'),
             updated_at=data.get('updated_at')

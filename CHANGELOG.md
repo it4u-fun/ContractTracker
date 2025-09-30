@@ -5,6 +5,24 @@ All notable changes to the Contract Tracker project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2025-09-30
+
+### Added
+- **Custom Holidays Management**: Complete system for managing user-defined holiday periods
+- **EBRD Christmas Closure Support**: Specific support for EBRD office closures and shutdowns
+- **Holiday Types**: Bank Holiday, Office Closure, and Personal Holiday categories
+- **Settings UI**: Full CRUD interface for custom holidays in Settings page
+- **Calendar Integration**: Custom holidays display in calendar with appropriate icons (🏛️, 🚫, 🏖️)
+- **API Endpoints**: Complete REST API for custom holidays management
+- **Data Source Toggle**: Custom holidays can be enabled/disabled in data sources
+
+### Technical Details
+- **New Models**: `CustomHoliday` and `CustomHolidayCollection` data models
+- **New Repository**: `CustomHolidayRepository` for data persistence
+- **New API Routes**: `/api/custom-holidays` with full CRUD operations
+- **Calendar Integration**: Custom holidays appear in contract calendar view
+- **Validation**: Date range validation and overlap prevention
+
 ## [1.2.0] - 2025-09-30
 
 ### Fixed

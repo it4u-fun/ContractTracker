@@ -118,6 +118,16 @@ const Utils = {
         const textarea = document.createElement('textarea');
         textarea.innerHTML = String(value);
         return textarea.value;
+    },
+
+    /**
+     * Escape HTML entities for safe display
+     */
+    escapeHtml: function(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
     }
 };
 

@@ -10,6 +10,7 @@ from datetime import datetime
 
 from ..models.contract import Contract
 from ..models.settings import ApplicationSettings
+from ..models.custom_holidays import CustomHolidayCollection
 from ..utils.sanitization import DataSanitizer
 
 class BaseRepository:
@@ -236,6 +237,7 @@ class DataManager:
         self.data_dir = data_dir
         self.contracts = ContractRepository(data_dir)
         self.settings = SettingsRepository(data_dir)
+        self.custom_holidays = CustomHolidayRepository(data_dir)
     
     def get_all_contracts(self) -> Dict[str, Contract]:
         """Get all contracts."""
@@ -265,6 +267,27 @@ class DataManager:
         """Save application settings."""
         return self.settings.save_settings(settings)
     
+    # Custom holidays methods
+    def get_custom_holidays(self) -> CustomHolidayCollection:
+        """Get all custom holidays."""
+        return self.custom_holidays.get_all_holidays()
+    
+    def add_custom_holiday(self, holiday_data: Dict[str, Any]) -> tuple[bool, str]:
+        """Add a new custom holiday."""
+        return self.custom_holidays.add_holiday(holiday_data)
+    
+    def update_custom_holiday(self, holiday_id: str, holiday_data: Dict[str, Any]) -> tuple[bool, str]:
+        """Update an existing custom holiday."""
+        return self.custom_holidays.update_holiday(holiday_id, holiday_data)
+    
+    def delete_custom_holiday(self, holiday_id: str) -> tuple[bool, str]:
+        """Delete a custom holiday."""
+        return self.custom_holidays.delete_holiday(holiday_id)
+    
+    def get_custom_holidays_in_range(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
+        """Get custom holidays within a date range."""
+        return self.custom_holidays.get_holidays_in_range(start_date, end_date)
+    
     def backup_data(self, backup_dir: str) -> bool:
         """Create a backup of all data."""
         try:
@@ -290,3 +313,125 @@ class DataManager:
         except Exception as e:
             print(f"Error creating backup: {e}")
             return False
+
+class CustomHolidayRepository(BaseRepository):
+    """Repository for managing custom holiday data."""
+    
+    def __init__(self, data_dir: str):
+        super().__init__(data_dir, 'custom_holidays.json')
+    
+    def get_all_holidays(self) -> CustomHolidayCollection:
+        """Get all custom holidays."""
+        data = self._load_data()
+        if not data:
+            return CustomHolidayCollection()
+        
+        return CustomHolidayCollection.from_dict(data)
+    
+    def save_holidays(self, holidays: CustomHolidayCollection) -> bool:
+        """Save custom holidays collection."""
+        try:
+            data = holidays.to_dict()
+            return self._save_data(data)
+        except Exception as e:
+            print(f"Error saving custom holidays: {e}")
+            return False
+    
+    def add_holiday(self, holiday_data: Dict[str, Any]) -> tuple[bool, str]:
+        """Add a new custom holiday."""
+        try:
+            # Generate holiday ID if not provided
+            if 'holiday_id' not in holiday_data or not holiday_data['holiday_id']:
+                holiday_data['holiday_id'] = str(uuid.uuid4())
+            
+            # Create holiday object
+            from ..models.custom_holidays import CustomHoliday
+            holiday = CustomHoliday.from_dict(holiday_data)
+            
+            # Validate
+            errors = holiday.validate()
+            if errors:
+                return False, "; ".join(errors)
+            
+            # Get existing holidays
+            holidays = self.get_all_holidays()
+            
+            # Check for overlapping holidays
+            for existing in holidays.holidays:
+                if holidays._holidays_overlap(holiday, existing):
+                    return False, "Holiday overlaps with existing holiday period"
+            
+            # Add holiday
+            if holidays.add_holiday(holiday):
+                if self.save_holidays(holidays):
+                    return True, "Holiday added successfully"
+                else:
+                    return False, "Failed to save holiday"
+            else:
+                return False, "Failed to add holiday"
+                
+        except Exception as e:
+            return False, f"Error adding holiday: {str(e)}"
+    
+    def update_holiday(self, holiday_id: str, holiday_data: Dict[str, Any]) -> tuple[bool, str]:
+        """Update an existing custom holiday."""
+        try:
+            holidays = self.get_all_holidays()
+            holiday = holidays.get_holiday(holiday_id)
+            
+            if not holiday:
+                return False, "Holiday not found"
+            
+            # Update holiday data
+            holiday_data['holiday_id'] = holiday_id  # Ensure ID doesn't change
+            updated_holiday = CustomHoliday.from_dict(holiday_data)
+            
+            # Validate
+            errors = updated_holiday.validate()
+            if errors:
+                return False, "; ".join(errors)
+            
+            # Check for overlapping holidays (excluding current one)
+            for existing in holidays.holidays:
+                if existing.holiday_id != holiday_id and holidays._holidays_overlap(updated_holiday, existing):
+                    return False, "Holiday overlaps with existing holiday period"
+            
+            # Update in collection
+            for i, h in enumerate(holidays.holidays):
+                if h.holiday_id == holiday_id:
+                    holidays.holidays[i] = updated_holiday
+                    break
+            
+            if self.save_holidays(holidays):
+                return True, "Holiday updated successfully"
+            else:
+                return False, "Failed to save updated holiday"
+                
+        except Exception as e:
+            return False, f"Error updating holiday: {str(e)}"
+    
+    def delete_holiday(self, holiday_id: str) -> tuple[bool, str]:
+        """Delete a custom holiday."""
+        try:
+            holidays = self.get_all_holidays()
+            
+            if holidays.remove_holiday(holiday_id):
+                if self.save_holidays(holidays):
+                    return True, "Holiday deleted successfully"
+                else:
+                    return False, "Failed to save after deletion"
+            else:
+                return False, "Holiday not found"
+                
+        except Exception as e:
+            return False, f"Error deleting holiday: {str(e)}"
+    
+    def get_holidays_in_range(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
+        """Get all holidays that overlap with the given date range."""
+        try:
+            holidays = self.get_all_holidays()
+            overlapping = holidays.get_holidays_in_range(start_date, end_date)
+            return [holiday.to_dict() for holiday in overlapping]
+        except Exception as e:
+            print(f"Error getting holidays in range: {e}")
+            return []

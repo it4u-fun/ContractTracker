@@ -23,9 +23,11 @@ def create_app(config_name='default'):
     # Register blueprints
     from .api.contracts import contracts_bp
     from .api.dashboard import dashboard_bp
+    from .api.custom_holidays import custom_holidays_bp
     
     app.register_blueprint(contracts_bp, url_prefix='/api/contracts')
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
+    app.register_blueprint(custom_holidays_bp)
     
     # Make data manager available to all routes
     app.data_manager = data_manager

@@ -142,7 +142,8 @@ def create_contract():
 def update_contract(contract_key: str):
     """Update an existing contract."""
     try:
-        contract = current_app.data_manager.get_contract(contract_key)
+        original_key = DataSanitizer.sanitize_string(contract_key)
+        contract = current_app.data_manager.get_contract(original_key)
         
         if not contract:
             return jsonify({
@@ -167,11 +168,16 @@ def update_contract(contract_key: str):
             if field in data:
                 setattr(contract, field, data[field])
         
-        # Save updated contract
+        # Save updated contract under possibly new key
+        new_key = contract.contract_key
+        if new_key != original_key:
+            # Remove old record then save under new key (rename)
+            current_app.data_manager.delete_contract(original_key)
         if current_app.data_manager.save_contract(contract):
             return jsonify({
                 'success': True,
-                'contract': contract.to_dict()
+                'contract': contract.to_dict(),
+                'contract_key': new_key
             })
         else:
             return jsonify({

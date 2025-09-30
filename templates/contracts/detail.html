@@ -204,6 +204,8 @@ async function loadContractDetails() {
         
         if (data.success) {
             const contract = data.contract;
+            // Track the current key in case of rename
+            window.__currentContractKey = data.contract.contract_key || contractKey;
             
             // Update page title and info
             document.title = `${contract.client_company} - ${contract.contract_name} - Contract Tracker`;
@@ -251,7 +253,7 @@ async function loadContractDetails() {
             }
             
             // Update calendar link
-            document.getElementById('calendar-link').href = `/contracts/${contractKey}/calendar`;
+            document.getElementById('calendar-link').href = `/contracts/${window.__currentContractKey}/calendar`;
             
             // Display validation results
             displayValidation(data.validation);
@@ -352,7 +354,7 @@ async function saveContractEdits() {
         if (totalDaysInput && totalDaysInput.value) payload.total_days = parseInt(totalDaysInput.value, 10);
         if (dailyRateInput && dailyRateInput.value) payload.daily_rate = parseInt(dailyRateInput.value, 10);
 
-        const response = await fetch(`/api/contracts/${contractKey}`, {
+        const response = await fetch(`/api/contracts/${window.__currentContractKey || contractKey}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
@@ -361,6 +363,11 @@ async function saveContractEdits() {
 
         if (response.ok && data.success) {
             showFlashMessage('Contract updated successfully', 'success');
+            if (data.contract_key && data.contract_key !== window.__currentContractKey) {
+                // If key changed, redirect to the new details URL to avoid duplicate state
+                window.location.replace(`/contracts/${encodeURIComponent(data.contract_key)}`);
+                return;
+            }
             // Hide modal and refresh the details in-place
             bootstrap.Modal.getInstance(document.getElementById('editContractModal')).hide();
             await loadContractDetails();

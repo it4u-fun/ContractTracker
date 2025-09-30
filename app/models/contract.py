@@ -268,6 +268,7 @@ class Contract:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
+            'contract_key': self.contract_key,
             'staff_name': _html.unescape(self.staff_name),
             'client_company': _html.unescape(self.client_company),
             'contract_name': _html.unescape(self.contract_name),

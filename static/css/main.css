@@ -181,8 +181,9 @@ body {
     padding: 0.5rem;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    background-color: #ffffff;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff; /* Default white for non-working days */
     font-size: 1rem;
     font-weight: 500;
 }
@@ -221,8 +222,9 @@ body {
 
 /* Day Status Colors */
 .calendar-day.working {
-    background-color: #d1e7dd;
-    border-color: #a3d9a4;
+    background-color: #28a745; /* Green for working days */
+    color: #ffffff; /* White text on green background */
+    border-color: #1e7e34;
     border-width: 2px;
     font-weight: 700;
 }
@@ -305,18 +307,20 @@ body {
 /* Calendar Data Source Flags */
 .data-source-flag {
     position: absolute;
-    top: 2px;
-    right: 2px;
-    font-size: 0.7rem;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
     z-index: 10;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 50%;
-    width: 16px;
-    height: 16px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #dee2e6;
+    border: 2px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .data-source-flag.bank_holiday {
@@ -327,6 +331,30 @@ body {
 .data-source-flag.school_holiday {
     background: rgba(13, 202, 240, 0.9);
     border-color: #0dcaf0;
+}
+
+/* Day number positioning */
+.day-number {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    z-index: 5;
+}
+
+/* Weekend indicator */
+.weekend-indicator {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #6c757d;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1px 3px;
+    border-radius: 2px;
+    z-index: 5;
 }
 
 /* Outside Period Styling */
@@ -355,13 +383,14 @@ body {
     bottom: 2px;
     left: 2px;
     right: 2px;
-    font-size: 0.6rem;
+    font-size: 0.5rem;
     color: #6c757d;
     text-align: center;
     line-height: 1;
     background: rgba(248, 249, 250, 0.9);
     border-radius: 2px;
     padding: 1px;
+    z-index: 5;
 }
 
 /* Data Source Legend Styling */

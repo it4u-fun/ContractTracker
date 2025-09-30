@@ -9,6 +9,7 @@ from datetime import datetime
 
 from ..models.contract import Contract
 from ..models.settings import ApplicationSettings
+from ..utils.sanitization import DataSanitizer
 
 class BaseRepository:
     """Base repository class with common JSON persistence functionality."""
@@ -101,9 +102,12 @@ class ContractRepository(BaseRepository):
             return None
     
     def save_contract(self, contract: Contract) -> bool:
-        """Save a contract."""
+        """Save a contract with sanitized data."""
+        # Sanitize contract key before using it
+        sanitized_key = DataSanitizer.sanitize_string(contract.contract_key)
+        
         data = self._load_data()
-        data[contract.contract_key] = contract.to_dict()
+        data[sanitized_key] = contract.to_dict()
         return self._save_data(data)
     
     def update_contract(self, contract: Contract) -> bool:
@@ -111,17 +115,23 @@ class ContractRepository(BaseRepository):
         return self.save_contract(contract)  # Same as save for JSON storage
     
     def delete_contract(self, contract_key: str) -> bool:
-        """Delete a contract."""
+        """Delete a contract with sanitized key."""
+        # Sanitize contract key
+        sanitized_key = DataSanitizer.sanitize_string(contract_key)
+        
         data = self._load_data()
-        if contract_key in data:
-            del data[contract_key]
+        if sanitized_key in data:
+            del data[sanitized_key]
             return self._save_data(data)
         return True  # Already deleted
     
     def contract_exists(self, contract_key: str) -> bool:
-        """Check if a contract exists."""
+        """Check if a contract exists with sanitized key."""
+        # Sanitize contract key
+        sanitized_key = DataSanitizer.sanitize_string(contract_key)
+        
         data = self._load_data()
-        return contract_key in data
+        return sanitized_key in data
     
     def get_contracts_by_staff(self, staff_name: str) -> List[Contract]:
         """Get all contracts for a specific staff member."""

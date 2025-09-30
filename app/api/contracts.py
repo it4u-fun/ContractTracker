@@ -8,6 +8,7 @@ from typing import Dict, Any
 from ..models.contract import Contract, DayStatus
 from ..services.validation_service import ValidationService
 from ..services.suggestion_service import SuggestionService
+from ..utils.sanitization import DataSanitizer
 
 contracts_bp = Blueprint('contracts', __name__)
 
@@ -53,6 +54,9 @@ def get_all_contracts():
 def get_contract(contract_key: str):
     """Get a specific contract."""
     try:
+        # Sanitize contract key
+        contract_key = DataSanitizer.sanitize_string(contract_key)
+        
         contract = current_app.data_manager.get_contract(contract_key)
         
         if not contract:
@@ -82,26 +86,30 @@ def create_contract():
     try:
         data = request.get_json()
         
-        # Validate required fields
-        required_fields = ['staff_name', 'client_company', 'contract_name', 
-                          'start_date', 'end_date', 'total_days', 'daily_rate']
+        if not data:
+            return jsonify({
+                'success': False,
+                'error': 'No data provided'
+            }), 400
         
-        for field in required_fields:
-            if field not in data:
-                return jsonify({
-                    'success': False,
-                    'error': f'Missing required field: {field}'
-                }), 400
+        # Sanitize all input data
+        try:
+            sanitized_data = DataSanitizer.sanitize_contract_data(data)
+        except ValueError as e:
+            return jsonify({
+                'success': False,
+                'error': f'Data validation error: {str(e)}'
+            }), 400
         
-        # Create contract
+        # Create contract with sanitized data
         contract = Contract(
-            staff_name=data['staff_name'],
-            client_company=data['client_company'],
-            contract_name=data['contract_name'],
-            start_date=data['start_date'],
-            end_date=data['end_date'],
-            total_days=data['total_days'],
-            daily_rate=data['daily_rate']
+            staff_name=sanitized_data['staff_name'],
+            client_company=sanitized_data['client_company'],
+            contract_name=sanitized_data['contract_name'],
+            start_date=sanitized_data['start_date'],
+            end_date=sanitized_data['end_date'],
+            total_days=sanitized_data['total_days'],
+            daily_rate=sanitized_data['daily_rate']
         )
         
         # Check if contract already exists
@@ -201,6 +209,9 @@ def delete_contract(contract_key: str):
 def update_day_status(contract_key: str):
     """Update the status of a specific day."""
     try:
+        # Sanitize contract key
+        contract_key = DataSanitizer.sanitize_string(contract_key)
+        
         contract = current_app.data_manager.get_contract(contract_key)
         
         if not contract:
@@ -211,24 +222,33 @@ def update_day_status(contract_key: str):
         
         data = request.get_json()
         
-        if 'date' not in data or 'status' not in data:
+        if not data:
             return jsonify({
                 'success': False,
-                'error': 'Missing required fields: date, status'
+                'error': 'No data provided'
+            }), 400
+        
+        # Sanitize day allocation data
+        try:
+            sanitized_data = DataSanitizer.sanitize_day_allocation_data(data)
+        except ValueError as e:
+            return jsonify({
+                'success': False,
+                'error': f'Data validation error: {str(e)}'
             }), 400
         
         # Validate status
         try:
-            status = DayStatus(data['status'])
+            status = DayStatus(sanitized_data['status'])
         except ValueError:
             return jsonify({
                 'success': False,
-                'error': f'Invalid status: {data["status"]}'
+                'error': f'Invalid status: {sanitized_data["status"]}'
             }), 400
         
         # Update day status
-        notes = data.get('notes')
-        contract.set_day_status(data['date'], status, notes)
+        notes = sanitized_data.get('notes')
+        contract.set_day_status(sanitized_data['date'], status, notes)
         
         # Save contract
         if current_app.data_manager.save_contract(contract):

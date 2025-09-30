@@ -70,15 +70,47 @@ class Contract:
         if self.days is None:
             self.days = {}
         
+        # Sanitize all string inputs
+        self._sanitize_inputs()
+        
         now = datetime.now().isoformat()
         if self.created_at is None:
             self.created_at = now
         self.updated_at = now
     
+    def _sanitize_inputs(self):
+        """Sanitize all input data."""
+        from ..utils.sanitization import DataSanitizer
+        
+        # Sanitize string fields
+        self.staff_name = DataSanitizer.sanitize_string(self.staff_name, 100)
+        self.client_company = DataSanitizer.sanitize_string(self.client_company, 100)
+        self.contract_name = DataSanitizer.sanitize_string(self.contract_name, 200)
+        
+        # Validate dates
+        self.start_date = DataSanitizer.sanitize_date(self.start_date)
+        self.end_date = DataSanitizer.sanitize_date(self.end_date)
+        
+        # Validate date order
+        if self.start_date and self.end_date:
+            start_dt = datetime.strptime(self.start_date, '%Y-%m-%d')
+            end_dt = datetime.strptime(self.end_date, '%Y-%m-%d')
+            if end_dt <= start_dt:
+                raise ValueError("End date must be after start date")
+        
+        # Validate integers
+        self.total_days = DataSanitizer.sanitize_integer(self.total_days, min_value=1, max_value=365)
+        self.daily_rate = DataSanitizer.sanitize_integer(self.daily_rate, min_value=0, max_value=10000)
+    
     @property
     def contract_key(self) -> str:
-        """Generate unique contract key."""
-        return f"{self.staff_name}_{self.client_company}_{self.contract_name}"
+        """Generate unique contract key using sanitization."""
+        from ..utils.sanitization import DataSanitizer
+        return DataSanitizer.sanitize_contract_key(
+            self.staff_name, 
+            self.client_company, 
+            self.contract_name
+        )
     
     @property
     def start_datetime(self) -> datetime:
@@ -127,6 +159,13 @@ class Contract:
     
     def set_day_status(self, date: str, status: DayStatus, notes: Optional[str] = None) -> None:
         """Set the status for a specific day."""
+        from ..utils.sanitization import DataSanitizer
+        
+        # Sanitize inputs
+        date = DataSanitizer.sanitize_date(date)
+        if notes:
+            notes = DataSanitizer.sanitize_string(notes, 1000)
+        
         day = self.days.get(date)
         if day:
             day.status = status

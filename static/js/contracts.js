@@ -1,86 +1,62 @@
 /**
- * Dashboard JavaScript
+ * Contracts JavaScript
  */
 
-class Dashboard {
+class ContractsPage {
     constructor() {
         this.contracts = [];
-        this.settings = {};
         this.init();
     }
 
     async init() {
         try {
-            await this.loadDashboardData();
-            this.renderDashboard();
+            await this.loadContractsData();
+            this.renderContracts();
         } catch (error) {
-            console.error('Failed to initialize dashboard:', error);
-            this.showError('Failed to load dashboard data');
+            console.error('Failed to initialize contracts page:', error);
+            this.showError('Failed to load contracts data');
         }
     }
 
-    async loadDashboardData() {
+    async loadContractsData() {
         const data = await Utils.apiRequest('/api/dashboard/');
         
         if (data.success) {
             this.contracts = data.dashboard.contracts;
-            this.settings = data.settings;
         } else {
-            throw new Error(data.error || 'Failed to load dashboard data');
+            throw new Error(data.error || 'Failed to load contracts data');
         }
-    }
-
-    renderDashboard() {
-        this.updateStats();
-        this.renderContracts();
-    }
-
-    updateStats() {
-        const totalContracts = this.contracts.length;
-        const totalValue = this.contracts.reduce((sum, contract) => sum + contract.total_value, 0);
-        const totalEarned = this.contracts.reduce((sum, contract) => sum + contract.earned_value, 0);
-        const totalRemaining = totalValue - totalEarned;
-
-        document.getElementById('total-contracts').textContent = totalContracts;
-        document.getElementById('total-value').textContent = Utils.formatCurrency(totalValue);
-        document.getElementById('total-earned').textContent = Utils.formatCurrency(totalEarned);
-        document.getElementById('total-remaining').textContent = Utils.formatCurrency(totalRemaining);
     }
 
     renderContracts() {
         const container = document.getElementById('contracts-container');
-        const loadingState = document.getElementById('loading-state');
-        const emptyState = document.getElementById('empty-state');
-
-        // Hide loading state
-        if (loadingState) {
-            loadingState.style.display = 'none';
-        }
-
-        if (this.contracts.length === 0) {
-            // Show empty state
-            if (emptyState) {
-                emptyState.style.display = 'block';
-            }
-            if (container) {
-                container.innerHTML = '';
-            }
+        
+        if (!container) {
+            console.error('Contracts container not found');
             return;
         }
 
-        // Hide empty state
-        if (emptyState) {
-            emptyState.style.display = 'none';
+        if (this.contracts.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-file-contract fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No contracts yet</h4>
+                    <p class="text-muted">Create your first contract to start tracking your working days.</p>
+                    <a href="/contracts/new" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>
+                        Create New Contract
+                    </a>
+                </div>
+            `;
+            return;
         }
 
         // Render contracts
-        if (container) {
-            container.innerHTML = '';
-            this.contracts.forEach(contract => {
-                const contractCard = this.createContractCard(contract);
-                container.appendChild(contractCard);
-            });
-        }
+        container.innerHTML = '';
+        this.contracts.forEach(contract => {
+            const contractCard = this.createContractCard(contract);
+            container.appendChild(contractCard);
+        });
     }
 
     createContractCard(contract) {
@@ -174,7 +150,7 @@ class Dashboard {
                     </div>
                     <div>
                         <button class="btn btn-outline-danger btn-sm" 
-                                onclick="dashboard.deleteContract('${contract.key}')">
+                                onclick="contractsPage.deleteContract('${contract.key}')">
                             <i class="fas fa-trash me-1"></i>
                             Delete
                         </button>
@@ -203,7 +179,6 @@ class Dashboard {
                 this.contracts = this.contracts.filter(contract => contract.key !== contractKey);
                 
                 // Update display
-                this.updateStats();
                 this.renderContracts();
             } else {
                 throw new Error(data.error || 'Failed to delete contract');
@@ -216,54 +191,43 @@ class Dashboard {
 
     async refresh() {
         try {
-            const loadingState = document.getElementById('loading-state');
-            if (loadingState) {
-                loadingState.style.display = 'block';
-            }
-
-            await this.loadDashboardData();
-            this.renderDashboard();
-
-            showFlashMessage('Dashboard refreshed successfully', 'success');
+            await this.loadContractsData();
+            this.renderContracts();
+            showFlashMessage('Contracts refreshed successfully', 'success');
         } catch (error) {
-            console.error('Failed to refresh dashboard:', error);
-            this.showError('Failed to refresh dashboard');
+            console.error('Failed to refresh contracts:', error);
+            this.showError('Failed to refresh contracts');
         }
     }
 
     showError(message) {
         showFlashMessage(message, 'danger');
         
-        const loadingState = document.getElementById('loading-state');
-        const emptyState = document.getElementById('empty-state');
-        
-        if (loadingState) {
-            loadingState.style.display = 'none';
-        }
-        
-        if (emptyState) {
-            emptyState.style.display = 'block';
-            emptyState.innerHTML = `
-                <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
-                <h4 class="text-danger">Error Loading Dashboard</h4>
-                <p class="text-muted">${message}</p>
-                <button class="btn btn-primary" onclick="dashboard.refresh()">
-                    <i class="fas fa-sync-alt me-2"></i>
-                    Try Again
-                </button>
+        const container = document.getElementById('contracts-container');
+        if (container) {
+            container.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-exclamation-triangle fa-3x text-danger mb-3"></i>
+                    <h4 class="text-danger">Error Loading Contracts</h4>
+                    <p class="text-muted">${message}</p>
+                    <button class="btn btn-primary" onclick="contractsPage.refresh()">
+                        <i class="fas fa-sync-alt me-2"></i>
+                        Try Again
+                    </button>
+                </div>
             `;
         }
     }
 }
 
 // Global functions
-function refreshDashboard() {
-    if (window.dashboard) {
-        window.dashboard.refresh();
+function refreshContracts() {
+    if (window.contractsPage) {
+        window.contractsPage.refresh();
     }
 }
 
-// Initialize dashboard when page loads
+// Initialize contracts page when DOM loads
 document.addEventListener('DOMContentLoaded', function() {
-    window.dashboard = new Dashboard();
+    window.contractsPage = new ContractsPage();
 });

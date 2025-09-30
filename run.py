@@ -48,6 +48,22 @@ def create_web_app():
         """Settings page."""
         return render_template('settings/index.html')
     
+    @app.route('/api')
+    def api_info():
+        """API information page."""
+        from flask import jsonify
+        return jsonify({
+            "message": "Contract Tracker API",
+            "version": "1.0.0",
+            "endpoints": {
+                "dashboard": "/api/dashboard/",
+                "contracts": "/api/contracts/",
+                "settings": "/api/dashboard/settings"
+            },
+            "documentation": "/api/docs",
+            "status": "running"
+        })
+    
     return app
 
 # Create the app instance for gunicorn

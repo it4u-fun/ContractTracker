@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Contract Details - Contract Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-file-contract me-3"></i>Contract Details</h1>
+                <p class="text-muted" id="contract-info">Loading contract information...</p>
+            </div>
+            <div>
+                <a href="#" id="calendar-link" class="btn btn-primary">
+                    <i class="fas fa-calendar me-2"></i>
+                    View Calendar
+                </a>
+                <a href="{{ url_for('contracts_index') }}" class="btn btn-secondary ms-2">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Back to Contracts
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contract Overview -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Contract Information
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Staff Name:</strong> <span id="staff-name">-</span></p>
+                        <p><strong>Client Company:</strong> <span id="client-company">-</span></p>
+                        <p><strong>Contract Name:</strong> <span id="contract-name">-</span></p>
+                        <p><strong>Daily Rate:</strong> £<span id="daily-rate">-</span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Start Date:</strong> <span id="start-date">-</span></p>
+                        <p><strong>End Date:</strong> <span id="end-date">-</span></p>
+                        <p><strong>Total Days:</strong> <span id="total-days">-</span></p>
+                        <p><strong>Total Value:</strong> £<span id="total-value">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Quick Stats</h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <h3 class="text-primary" id="working-days-count">0</h3>
+                    <small class="text-muted">Working Days</small>
+                </div>
+                <div class="text-center mb-3">
+                    <h3 class="text-warning" id="remaining-days">0</h3>
+                    <small class="text-muted">Remaining</small>
+                </div>
+                <div class="text-center">
+                    <span id="balance-status" class="badge bg-secondary">Unknown</span>
+                    <br><small class="text-muted">Status</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Progress and Validation -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Progress & Validation</h6>
+            </div>
+            <div class="card-body">
+                <!-- Progress Bar -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Contract Progress</span>
+                        <span id="progress-percentage">0%</span>
+                    </div>
+                    <div class="progress" style="height: 10px;">
+                        <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <!-- Validation Results -->
+                <div id="validation-results">
+                    <!-- Validation will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2 d-md-flex">
+                    <button class="btn btn-primary" onclick="goToCalendar()">
+                        <i class="fas fa-calendar me-2"></i>
+                        Open Calendar
+                    </button>
+                    <button class="btn btn-outline-info" onclick="showSuggestions()">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Get Suggestions
+                    </button>
+                    <button class="btn btn-outline-success" onclick="validateContract()">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Validate Contract
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="deleteContract()">
+                        <i class="fas fa-trash me-2"></i>
+                        Delete Contract
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include flash messages component -->
+{% include 'components/flash_messages.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Get contract key from URL
+const contractKey = '{{ contract_key }}';
+
+// Load contract data when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadContractDetails();
+});
+
+async function loadContractDetails() {
+    try {
+        const response = await fetch(`/api/contracts/${contractKey}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const contract = data.contract;
+            
+            // Update page title and info
+            document.title = `${contract.contract_name} - Contract Tracker`;
+            document.getElementById('contract-info').textContent = 
+                `${contract.client_company} - ${contract.contract_name}`;
+            
+            // Update contract details
+            document.getElementById('staff-name').textContent = contract.staff_name;
+            document.getElementById('client-company').textContent = contract.client_company;
+            document.getElementById('contract-name').textContent = contract.contract_name;
+            document.getElementById('daily-rate').textContent = contract.daily_rate;
+            document.getElementById('start-date').textContent = Utils.formatDate(contract.start_date);
+            document.getElementById('end-date').textContent = Utils.formatDate(contract.end_date);
+            document.getElementById('total-days').textContent = contract.total_days;
+            document.getElementById('total-value').textContent = contract.total_value.toLocaleString();
+            
+            // Update stats
+            document.getElementById('working-days-count').textContent = contract.working_days_count;
+            document.getElementById('remaining-days').textContent = contract.remaining_working_days;
+            
+            // Update progress
+            const progressPercentage = contract.total_days > 0 ? 
+                (contract.working_days_count / contract.total_days * 100) : 0;
+            document.getElementById('progress-percentage').textContent = 
+                progressPercentage.toFixed(1) + '%';
+            document.getElementById('progress-bar').style.width = progressPercentage + '%';
+            
+            // Update status
+            const statusElement = document.getElementById('balance-status');
+            if (contract.is_balanced) {
+                statusElement.textContent = 'Balanced';
+                statusElement.className = 'badge bg-success';
+            } else {
+                statusElement.textContent = 'Not Balanced';
+                statusElement.className = 'badge bg-warning';
+            }
+            
+            // Update calendar link
+            document.getElementById('calendar-link').href = `/contracts/${contractKey}/calendar`;
+            
+            // Display validation results
+            displayValidation(data.validation);
+            
+        } else {
+            showFlashMessage('Failed to load contract details', 'danger');
+        }
+    } catch (error) {
+        console.error('Error loading contract:', error);
+        showFlashMessage('Error loading contract details', 'danger');
+    }
+}
+
+function displayValidation(validation) {
+    const container = document.getElementById('validation-results');
+    
+    if (validation.is_valid) {
+        container.innerHTML = `
+            <div class="alert alert-success">
+                <i class="fas fa-check-circle me-2"></i>
+                Contract is valid and ready to use!
+            </div>
+        `;
+    } else {
+        let html = '';
+        
+        if (validation.violations.length > 0) {
+            html += `
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-exclamation-triangle me-2"></i>Violations</h6>
+                    <ul class="mb-0">
+                        ${validation.violations.map(v => `<li>${v}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        if (validation.warnings.length > 0) {
+            html += `
+                <div class="alert alert-warning">
+                    <h6><i class="fas fa-exclamation-circle me-2"></i>Warnings</h6>
+                    <ul class="mb-0">
+                        ${validation.warnings.map(w => `<li>${w}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        if (validation.suggestions.length > 0) {
+            html += `
+                <div class="alert alert-info">
+                    <h6><i class="fas fa-lightbulb me-2"></i>Suggestions</h6>
+                    <ul class="mb-0">
+                        ${validation.suggestions.map(s => `<li>${s}</li>`).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+        
+        container.innerHTML = html;
+    }
+}
+
+function goToCalendar() {
+    window.location.href = `/contracts/${contractKey}/calendar`;
+}
+
+async function showSuggestions() {
+    try {
+        const response = await fetch(`/api/contracts/${contractKey}/suggestions`);
+        const data = await response.json();
+        
+        if (data.success) {
+            const suggestions = data.suggestions.slice(0, 10); // Show first 10
+            showFlashMessage(
+                `Generated ${data.count} working day suggestions. First few: ${suggestions.join(', ')}...`, 
+                'info'
+            );
+        } else {
+            showFlashMessage('Failed to get suggestions', 'danger');
+        }
+    } catch (error) {
+        console.error('Error getting suggestions:', error);
+        showFlashMessage('Error getting suggestions', 'danger');
+    }
+}
+
+async function validateContract() {
+    try {
+        const response = await fetch(`/api/contracts/${contractKey}/validate`);
+        const data = await response.json();
+        
+        if (data.success) {
+            displayValidation(data.validation);
+            showFlashMessage('Contract validation completed', 'success');
+        } else {
+            showFlashMessage('Failed to validate contract', 'danger');
+        }
+    } catch (error) {
+        console.error('Error validating contract:', error);
+        showFlashMessage('Error validating contract', 'danger');
+    }
+}
+
+async function deleteContract() {
+    if (confirm('Are you sure you want to delete this contract? This action cannot be undone.')) {
+        try {
+            const response = await fetch(`/api/contracts/${contractKey}`, {
+                method: 'DELETE'
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                showFlashMessage('Contract deleted successfully', 'success');
+                setTimeout(() => {
+                    window.location.href = '/contracts';
+                }, 2000);
+            } else {
+                showFlashMessage(data.error || 'Failed to delete contract', 'danger');
+            }
+        } catch (error) {
+            console.error('Error deleting contract:', error);
+            showFlashMessage('Error deleting contract', 'danger');
+        }
+    }
+}
+</script>
+{% endblock %}

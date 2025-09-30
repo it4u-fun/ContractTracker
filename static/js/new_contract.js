@@ -71,14 +71,35 @@ class NewContractForm {
 
     getFormData() {
         return {
-            staff_name: document.getElementById('staff_name')?.value || '',
-            client_company: document.getElementById('client_company')?.value || '',
-            contract_name: document.getElementById('contract_name')?.value || '',
-            start_date: document.getElementById('start_date')?.value || '',
-            end_date: document.getElementById('end_date')?.value || '',
+            staff_name: this.sanitizeInput(document.getElementById('staff_name')?.value || ''),
+            client_company: this.sanitizeInput(document.getElementById('client_company')?.value || ''),
+            contract_name: this.sanitizeInput(document.getElementById('contract_name')?.value || ''),
+            start_date: this.sanitizeInput(document.getElementById('start_date')?.value || ''),
+            end_date: this.sanitizeInput(document.getElementById('end_date')?.value || ''),
             total_days: parseInt(document.getElementById('total_days')?.value) || 0,
             daily_rate: parseFloat(document.getElementById('daily_rate')?.value) || 0
         };
+    }
+
+    sanitizeInput(value) {
+        if (typeof value !== 'string') {
+            return value;
+        }
+        
+        // Remove null bytes and control characters
+        value = value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '');
+        
+        // Trim whitespace
+        value = value.trim();
+        
+        // HTML escape
+        value = value.replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#x27;');
+        
+        return value;
     }
 
     validateDates() {
@@ -151,7 +172,7 @@ class NewContractForm {
                 showFlashMessage('Contract created successfully!', 'success');
                 
                 // Redirect to contract calendar
-                window.location.href = `/contracts/${response.contract_key}/calendar`;
+                window.location.href = `/contracts/${encodeURIComponent(response.contract_key)}/calendar`;
             } else {
                 throw new Error(response.error || 'Failed to create contract');
             }

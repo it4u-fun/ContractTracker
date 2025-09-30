@@ -3,6 +3,7 @@ Dashboard API endpoints
 """
 
 from flask import Blueprint, jsonify, current_app
+from ..utils.sanitization import DataSanitizer
 
 dashboard_bp = Blueprint('dashboard', __name__)
 

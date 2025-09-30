@@ -148,6 +148,12 @@ body {
     padding: 1rem 0 !important;
 }
 
+/* Remove margins from calendar rows */
+.row {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
 .calendar-month {
     background: #ffffff;
     border: 2px solid #dee2e6;

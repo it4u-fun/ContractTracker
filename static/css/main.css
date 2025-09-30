@@ -201,6 +201,18 @@ body {
     border-right: 1px solid #dee2e6;
 }
 
+/* Saturday and Sunday header cells - slightly grey */
+.calendar-header .col:nth-child(6),
+.calendar-header .col:nth-child(7) {
+    background-color: #e9ecef;
+}
+
+/* Saturday and Sunday day cells - slightly grey background */
+.row .col:nth-child(6).calendar-day,
+.row .col:nth-child(7).calendar-day {
+    background-color: #e9ecef !important;
+}
+
 .calendar-day {
     min-height: 50px;
     border: 1px solid #dee2e6;

@@ -206,7 +206,8 @@ class ContractCalendar {
         const dayOfWeek = date.getDay();
         const daysUntilMonday = dayOfWeek === 0 ? 1 : 8 - dayOfWeek;
         date.setDate(daysUntilMonday);
-        return date.toISOString().split('T')[0];
+        // Use timezone-safe date formatting to avoid UTC conversion issues
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
     
     getLastMondayInMonth(year, month) {
@@ -214,7 +215,8 @@ class ContractCalendar {
         const dayOfWeek = date.getDay();
         const daysBackToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
         date.setDate(date.getDate() - daysBackToMonday);
-        return date.toISOString().split('T')[0];
+        // Use timezone-safe date formatting to avoid UTC conversion issues
+        return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     }
 
     getDataSourceFlags(dateString) {

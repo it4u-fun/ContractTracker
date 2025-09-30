@@ -285,6 +285,9 @@ class ContractCalendar {
                 weeks: this.generateMonthWeeks(current.getFullYear(), current.getMonth() + 1, startDate, endDate)
             };
             
+            // Calculate working days for this month
+            monthData.workingDays = this.calculateMonthWorkingDays(monthData.year, monthData.month);
+            
             months.push(monthData);
             
             // Move to next month
@@ -292,6 +295,22 @@ class ContractCalendar {
         }
         
         return months;
+    }
+    
+    calculateMonthWorkingDays(year, month) {
+        let workingDays = 0;
+        
+        if (this.contract && this.contract.days) {
+            // contract.days is an object, not an array
+            Object.values(this.contract.days).forEach(day => {
+                const dayDate = new Date(day.date + 'T00:00:00');
+                if (dayDate.getFullYear() === year && (dayDate.getMonth() + 1) === month && day.status === 'working') {
+                    workingDays++;
+                }
+            });
+        }
+        
+        return workingDays;
     }
 
     generateMonthWeeks(year, month, contractStart, contractEnd) {
@@ -410,7 +429,10 @@ class ContractCalendar {
         monthDiv.className = 'calendar-month';
         
         monthDiv.innerHTML = `
-            <h5 class="text-center mb-3">${month.monthName}</h5>
+            <h5 class="text-center mb-3">
+                ${month.monthName}
+                <span class="badge bg-success ms-2">${month.workingDays} days</span>
+            </h5>
             <div class="calendar-grid">
                 <div class="calendar-header row">
                     <div class="col text-center">Mon</div>

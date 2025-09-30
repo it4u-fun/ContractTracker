@@ -142,10 +142,10 @@ body {
 
 /* Calendar Styles */
 .calendar-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-    gap: 1.5rem;
-    padding: 1rem 0;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)) !important;
+    gap: 1.5rem !important;
+    padding: 1rem 0 !important;
 }
 
 .calendar-month {

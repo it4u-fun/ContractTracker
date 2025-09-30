@@ -169,12 +169,15 @@ class ContractCalendar {
     
     getHolidayDates(startDate, endDate) {
         const dates = [];
-        const start = new Date(startDate);
-        const end = new Date(endDate);
+        // Parse dates in local timezone to avoid UTC conversion issues
+        const start = new Date(startDate + 'T00:00:00');
+        const end = new Date(endDate + 'T00:00:00');
         
         const current = new Date(start);
         while (current <= end) {
-            dates.push(current.toISOString().split('T')[0]);
+            // Use timezone-safe date formatting to avoid UTC conversion issues
+            const dateString = `${current.getFullYear()}-${String(current.getMonth() + 1).padStart(2, '0')}-${String(current.getDate()).padStart(2, '0')}`;
+            dates.push(dateString);
             current.setDate(current.getDate() + 1);
         }
         

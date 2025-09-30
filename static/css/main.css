@@ -207,7 +207,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: #ffffff; /* Default white for non-working days */
+    background-color: #6c757d; /* Dark grey for non-month days */
     font-size: 0.9rem;
     font-weight: 500;
 }
@@ -238,8 +238,8 @@ body {
 }
 
 .calendar-day.outside-period {
-    background-color: #e9ecef;
-    opacity: 0.6;
+    background-color: #d1d3d4; /* Light grey for outside contract days */
+    opacity: 0.8;
     cursor: not-allowed;
     border-color: #ced4da;
 }
@@ -260,12 +260,6 @@ body {
     font-weight: 700;
 }
 
-.calendar-day.holiday {
-    background-color: #f8d7da;
-    border-color: #f1aeb5;
-    border-width: 2px;
-    font-weight: 700;
-}
 
 .calendar-day.in_lieu {
     background-color: #cff4fc;
@@ -285,6 +279,15 @@ body {
     background-color: #f8f9fa;
     border-color: #dee2e6;
     border-width: 2px;
+}
+
+/* Non-working days (holiday status) should be white */
+.calendar-day.holiday {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border-color: #dee2e6 !important;
+    border-width: 1px !important;
+    font-weight: 500 !important;
 }
 
 /* Day Status Legend */
@@ -386,10 +389,10 @@ body {
 
 /* Outside Period Styling */
 .calendar-day.outside-period {
-    background-color: #f8f9fa !important;
+    background-color: #d1d3d4 !important; /* Light grey for outside contract days */
     color: #6c757d !important;
-    border-color: #dee2e6 !important;
-    opacity: 0.6;
+    border-color: #ced4da !important;
+    opacity: 0.8;
 }
 
 .calendar-day.outside-period .day-number {

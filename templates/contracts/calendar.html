@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Contract Calendar - Contract Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-calendar me-3"></i>Contract Calendar</h1>
+                <p class="text-muted" id="contract-info">Loading contract information...</p>
+            </div>
+            <div>
+                <button class="btn btn-outline-primary" onclick="refreshCalendar()">
+                    <i class="fas fa-sync-alt me-2"></i>
+                    Refresh
+                </button>
+                <a href="#" id="back-to-contracts" class="btn btn-secondary ms-2">
+                    <i class="fas fa-arrow-left me-2"></i>
+                    Back to Contracts
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contract Status Panel -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h5 class="text-primary" id="working-days-count">0</h5>
+                            <small class="text-muted">Working Days</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h5 class="text-warning" id="remaining-days">0</h5>
+                            <small class="text-muted">Remaining</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h5 class="text-success" id="total-allowed">0</h5>
+                            <small class="text-muted">Total Allowed</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <span id="balance-status" class="badge bg-secondary">Unknown</span>
+                            <br><small class="text-muted">Status</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="progress mt-3" style="height: 10px;">
+                    <div class="progress-bar" id="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6>Quick Actions</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary btn-sm" onclick="showSuggestions()">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Suggest Working Days
+                    </button>
+                    <button class="btn btn-outline-info btn-sm" onclick="showValidation()">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Validate Contract
+                    </button>
+                    <button class="btn btn-outline-success btn-sm" onclick="exportCalendar()">
+                        <i class="fas fa-download me-2"></i>
+                        Export Calendar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Day Status Legend -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">Day Status Legend</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="day-legend-item">
+                            <div class="day-status working" title="Working"></div>
+                            <small>Working</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="day-legend-item">
+                            <div class="day-status bank_holiday" title="Bank Holiday"></div>
+                            <small>Bank Holiday</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="day-legend-item">
+                            <div class="day-status holiday" title="Holiday"></div>
+                            <small>Holiday</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="day-legend-item">
+                            <div class="day-status in_lieu" title="In Lieu"></div>
+                            <small>In Lieu</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="day-legend-item">
+                            <div class="day-status on_call" title="On Call"></div>
+                            <small>On Call</small>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="day-legend-item">
+                            <div class="day-status not_applicable" title="Not Applicable"></div>
+                            <small>Not Applicable</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calendar Container -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Contract Calendar
+                </h5>
+                <div>
+                    <small class="text-muted">
+                        Click on any day to change its status
+                    </small>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Loading State -->
+                <div id="calendar-loading" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading calendar...</p>
+                </div>
+                
+                <!-- Calendar Content -->
+                <div id="calendar-container" style="display: none;">
+                    <!-- Calendar months will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include flash messages component -->
+{% include 'components/flash_messages.html' %}
+
+<!-- Day Status Modal -->
+<div class="modal fade" id="dayStatusModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Day Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modal-date-info"></p>
+                <div class="mb-3">
+                    <label for="day-status-select" class="form-label">Day Status</label>
+                    <select class="form-select" id="day-status-select">
+                        <option value="working">Working</option>
+                        <option value="bank_holiday">Bank Holiday/Office Shut</option>
+                        <option value="holiday">Holiday / Sick</option>
+                        <option value="in_lieu">In Lieu (off but paid)</option>
+                        <option value="on_call">On Call / Carry Over Time</option>
+                        <option value="not_applicable">Not Applicable</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="day-notes" class="form-label">Notes (optional)</label>
+                    <textarea class="form-control" id="day-notes" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveDayStatus()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Suggestions Modal -->
+<div class="modal fade" id="suggestionsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Suggest Working Days</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Based on your contract period, here are suggested working days:</p>
+                <div id="suggestions-content">
+                    <!-- Suggestions will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="applySuggestions()">Apply Suggestions</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+{% endblock %}

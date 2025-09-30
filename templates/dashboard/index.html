@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Contract Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-tachometer-alt me-3"></i>Dashboard</h1>
+                <p class="text-muted">Overview of your contracts and performance</p>
+            </div>
+            <div>
+                <a href="{{ url_for('new_contract') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    New Contract
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dashboard Stats -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="total-contracts">0</h4>
+                        <p class="card-text">Total Contracts</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-file-contract fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="total-value">£0</h4>
+                        <p class="card-text">Total Value</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-pound-sign fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="total-earned">£0</h4>
+                        <p class="card-text">Earned</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-chart-line fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title" id="total-remaining">£0</h4>
+                        <p class="card-text">Remaining</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-clock fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Contracts Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-file-contract me-2"></i>
+                    Your Contracts
+                </h5>
+                <div>
+                    <button class="btn btn-outline-primary btn-sm" onclick="refreshDashboard()">
+                        <i class="fas fa-sync-alt me-1"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Loading State -->
+                <div id="loading-state" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading contracts...</p>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="empty-state" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-file-contract fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No contracts yet</h4>
+                    <p class="text-muted">Create your first contract to start tracking your working days.</p>
+                    <a href="{{ url_for('new_contract') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>
+                        Create New Contract
+                    </a>
+                </div>
+                
+                <!-- Contracts List -->
+                <div id="contracts-container">
+                    <!-- Contract cards will be dynamically inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include flash messages component -->
+{% include 'components/flash_messages.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

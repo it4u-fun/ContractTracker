@@ -1,0 +1,44 @@
+# Contract Tracker - Python Dependencies
+
+# Web Framework
+Flask==2.3.3
+Werkzeug==2.3.7
+
+# Data Validation and Serialization
+marshmallow==3.20.1
+jsonschema==4.19.2
+
+# Date and Time Utilities
+python-dateutil==2.8.2
+
+# HTTP Requests (for external APIs)
+requests==2.31.0
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Development Dependencies
+pytest==7.4.2
+pytest-flask==1.2.0
+pytest-cov==4.1.0
+
+# Code Quality
+flake8==6.0.0
+black==23.7.0
+isort==5.12.0
+
+# Production Server
+gunicorn==21.2.0
+
+# Optional: Database Support (for future migration)
+# SQLAlchemy==2.0.21
+# Flask-SQLAlchemy==3.0.5
+# Flask-Migrate==4.0.5
+
+# Optional: Caching (for future enhancement)
+# Flask-Caching==2.0.2
+# redis==4.6.0
+
+# Optional: Background Tasks (for future enhancement)
+# celery==5.3.1
+# redis==4.6.0

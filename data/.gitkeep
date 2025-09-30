@@ -1,0 +1,2 @@
+# This file ensures the data directory is created and tracked by git
+# The actual data files (contracts.json, settings.json) will be created by the application

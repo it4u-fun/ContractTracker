@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - Contract Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0">
+                    <i class="fas fa-cog me-2"></i>
+                    Application Settings
+                </h4>
+            </div>
+            <div class="card-body">
+                <form id="settings-form">
+                    <!-- Financial Settings -->
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">Financial Settings</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="financial_year_start" class="form-label">Financial Year Start</label>
+                                    <input type="text" class="form-control" id="financial_year_start" 
+                                           name="financial_year_start" placeholder="15-Jul">
+                                    <div class="form-text">Format: DD-MMM (e.g., 15-Jul)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="vat_rate" class="form-label">VAT Rate (%)</label>
+                                    <input type="number" class="form-control" id="vat_rate" 
+                                           name="vat_rate" min="0" max="100" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="daily_rate" class="form-label">Default Daily Rate (£)</label>
+                            <input type="number" class="form-control" id="daily_rate" 
+                                   name="daily_rate" min="0" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <!-- Holiday Settings -->
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">Holiday Constraints</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="max_holiday_weeks" class="form-label">Max Holiday Weeks</label>
+                                    <input type="number" class="form-control" id="max_holiday_weeks" 
+                                           name="max_holiday_weeks" min="1" max="12">
+                                    <div class="form-text">Maximum consecutive holiday weeks</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="holiday_gap_weeks" class="form-label">Holiday Gap Weeks</label>
+                                    <input type="number" class="form-control" id="holiday_gap_weeks" 
+                                           name="holiday_gap_weeks" min="0" max="12">
+                                    <div class="form-text">Minimum gap between holiday periods</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Calendar Settings -->
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">Calendar Settings</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="week_starts_monday" 
+                                           name="week_starts_monday">
+                                    <label class="form-check-label" for="week_starts_monday">
+                                        Week starts on Monday
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="show_weekends" 
+                                           name="show_weekends">
+                                    <label class="form-check-label" for="show_weekends">
+                                        Show weekends in calendar
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Data Sources -->
+                    <div class="mb-4">
+                        <h5 class="text-primary mb-3">Data Sources</h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="uk_bank_holidays" 
+                                           name="enabled_data_sources">
+                                    <label class="form-check-label" for="uk_bank_holidays">
+                                        UK Bank Holidays
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" id="praewood_school" 
+                                           name="enabled_data_sources">
+                                    <label class="form-check-label" for="praewood_school">
+                                        PraeWood School Holidays
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Back to Dashboard
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            Save Settings
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include flash messages component -->
+{% include 'components/flash_messages.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

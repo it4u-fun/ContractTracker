@@ -164,12 +164,12 @@ async function loadContractDetails() {
                 pageTitle.innerHTML = `<i class="fas fa-file-contract me-3"></i>${contract.contract_name}`;
             }
             document.getElementById('contract-info').textContent = 
-                `${contract.client_company} - ${contract.contract_name}`;
+                `${Utils.decodeHtmlEntities(contract.client_company)} - ${Utils.decodeHtmlEntities(contract.contract_name)}`;
             
             // Update contract details
             document.getElementById('staff-name').textContent = contract.staff_name;
             document.getElementById('client-company').textContent = contract.client_company;
-            document.getElementById('contract-name').textContent = contract.contract_name;
+            document.getElementById('contract-name').textContent = Utils.decodeHtmlEntities(contract.contract_name);
             document.getElementById('daily-rate').textContent = contract.daily_rate;
             document.getElementById('start-date').textContent = Utils.formatDate(contract.start_date);
             document.getElementById('end-date').textContent = Utils.formatDate(contract.end_date);

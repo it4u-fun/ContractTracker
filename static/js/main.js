@@ -109,6 +109,16 @@ const Utils = {
             timeout = setTimeout(later, wait);
         };
     }
+    ,
+    /**
+     * Safely decode HTML entities to plain text (no HTML injection)
+     */
+    decodeHtmlEntities: function(value) {
+        if (value == null) return '';
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = String(value);
+        return textarea.value;
+    }
 };
 
 // Global event handlers

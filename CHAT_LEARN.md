@@ -93,6 +93,7 @@ Prefer conventional commit prefixes (e.g., `feat:`, `fix:`, `docs:`, `refactor:`
 - Keep data sanitized and validated across layers (see `app/utils/sanitization.py` and validation services).
 - Prefer Docker workflows for parity; use Compose profiles for nginx.
 - Submit changes with clear descriptions and keep API/README updated.
+- You rebuild container, run the new code, and then Test your changes have been successful. Look for any issues that may have introduced bugs. If found, fix them. Keep the Application in running, working order.
 
 For deeper docs, read: `README.md`, `API.md`, `Project.md`, `CONTRIBUTING.md`, and `CHANGELOG.md`.
 

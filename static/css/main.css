@@ -207,9 +207,9 @@ body {
     background-color: #e9ecef;
 }
 
-/* Saturday and Sunday day cells - slightly grey background */
-.row .col:nth-child(6).calendar-day,
-.row .col:nth-child(7).calendar-day {
+/* Saturday and Sunday day cells - slightly grey background (only for non-working days) */
+.row .col:nth-child(6).calendar-day:not(.working),
+.row .col:nth-child(7).calendar-day:not(.working) {
     background-color: #e9ecef !important;
 }
 

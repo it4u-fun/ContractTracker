@@ -510,7 +510,12 @@ class ContractCalendar {
                 if (!this.contract.days) {
                     this.contract.days = {};
                 }
-                this.contract.days[dateString] = { status: nextStatus, notes: '' };
+                this.contract.days[dateString] = { 
+                    date: dateString,
+                    status: nextStatus, 
+                    notes: '',
+                    is_weekend: this.contract.days[dateString]?.is_weekend || false
+                };
                 // Sync counters from server response
                 if (typeof data.working_days_count === 'number') {
                     this.contract.working_days_count = data.working_days_count;
@@ -672,6 +677,21 @@ class ContractCalendar {
             dayElement.className = dayElement.className.replace(/\bworking\b|\bholiday\b/g, '');
             // Add new status class
             dayElement.classList.add(status);
+            
+            // Update the month badge with new working days count
+            const dayDate = new Date(dateString + 'T00:00:00');
+            const year = dayDate.getFullYear();
+            const month = dayDate.getMonth() + 1;
+            const workingDays = this.calculateMonthWorkingDays(year, month);
+            
+            // Find and update the month badge
+            const monthElement = dayElement.closest('.calendar-month');
+            if (monthElement) {
+                const badge = monthElement.querySelector('.badge');
+                if (badge) {
+                    badge.textContent = `${workingDays} days`;
+                }
+            }
         }
     }
 

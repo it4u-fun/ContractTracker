@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **API Endpoints**: Complete REST API for custom holidays management
 - **Data Source Toggle**: Custom holidays can be enabled/disabled in data sources
 
+### Fixed
+- **Calendar Weekend Markings**: Fixed incorrect weekend detection logic
+  - Friday was incorrectly being marked as weekend (W/E)
+  - Now correctly identifies only Saturday and Sunday as weekends
+  - Updated logic from `getDay() >= 5` to `getDay() === 0 || getDay() === 6`
+
 ### Technical Details
 - **New Models**: `CustomHoliday` and `CustomHolidayCollection` data models
 - **New Repository**: `CustomHolidayRepository` for data persistence

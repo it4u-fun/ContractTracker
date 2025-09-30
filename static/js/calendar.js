@@ -311,7 +311,7 @@ class ContractCalendar {
             const dayData = {
                 day: day,
                 date: dateString,
-                isWeekend: currentDate.getDay() >= 5,
+                isWeekend: currentDate.getDay() === 0 || currentDate.getDay() === 6, // Sunday (0) or Saturday (6)
                 isOutsidePeriod: currentDate < contractStart || currentDate > contractEnd,
                 status: this.getDayStatus(dateString),
                 isCurrentMonth: true,

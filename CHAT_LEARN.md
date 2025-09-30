@@ -80,6 +80,13 @@ python run.py
   - Run performance traces and analyze Core Web Vitals
 - This is useful for automated/regression checks of pages like `dashboard`, `contracts`, and `settings`.
 
+### Ways of working
+- Use Docker via `docker-scripts.sh` for build/run; keep the app running and healthy.
+- Test changes end-to-end: rebuild, run, then verify UI/API; fix regressions immediately.
+- Use the Chrome agent to validate UI states, console/network, and performance.
+- Keep documentation concise and current in `CHAT_LEARN.md`, `README.md`, and `API.md`.
+- Prefer conventional commits and small, focused edits.
+
 ### Git workflow (docs-first)
 Always update relevant docs alongside code changes, then commit:
 ```bash

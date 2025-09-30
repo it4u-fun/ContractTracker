@@ -104,6 +104,13 @@ isort app/ tests/
 ./docker-scripts.sh build
 ```
 
+### 4a. Ways of Working (required)
+- Rebuild and run via Docker; keep the app in a working state at all times.
+- Validate UI and API after changes; fix regressions immediately.
+- Use the Chrome agent to exercise pages at `http://localhost:5000`, inspect console/network, and capture snapshots.
+- Update documentation (`CHAT_LEARN.md`, `README.md`, `API.md`) alongside code changes.
+- Use conventional commits (e.g., `feat:`, `fix:`, `docs:`) and small, focused PRs.
+
 ### 5. Submit a Pull Request
 
 - Push your branch to your fork

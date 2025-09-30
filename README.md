@@ -255,6 +255,12 @@ ContractTracker/
 pytest tests/
 ```
 
+### Ways of Working
+- Prefer Docker via `./docker-scripts.sh` to build/run; keep the app running and healthy.
+- After changes: rebuild, run, then verify UI/API; fix regressions immediately.
+- Use the Chrome agent to validate pages at `http://localhost:5000` (UI states, console/network, performance).
+- Keep docs up to date (`CHAT_LEARN.md`, `README.md`, `API.md`) and use conventional commits.
+
 ### Code Quality
 ```bash
 # Format code

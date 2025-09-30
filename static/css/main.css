@@ -355,7 +355,7 @@ body {
 .day-number {
     position: absolute;
     top: 4px;
-    left: 6px;
+    left: 2px;
     font-weight: 600;
     font-size: 0.9rem;
     z-index: 5;

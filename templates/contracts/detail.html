@@ -161,7 +161,8 @@ async function loadContractDetails() {
             document.title = `${contract.client_company} - ${contract.contract_name} - Contract Tracker`;
             const pageTitle = document.getElementById('page-title');
             if (pageTitle) {
-                pageTitle.innerHTML = `<i class="fas fa-file-contract me-3"></i>${contract.contract_name}`;
+                pageTitle.innerHTML = `<i class="fas fa-file-contract me-3"></i>`;
+                pageTitle.append(document.createTextNode(contract.contract_name));
             }
             document.getElementById('contract-info').textContent = 
                 `${Utils.decodeHtmlEntities(contract.client_company)} - ${Utils.decodeHtmlEntities(contract.contract_name)}`;

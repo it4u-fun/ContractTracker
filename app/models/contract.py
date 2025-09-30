@@ -3,6 +3,7 @@ Contract model for managing contract data and business logic.
 """
 
 from datetime import datetime, timedelta
+import html as _html
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, asdict
 from enum import Enum
@@ -267,9 +268,9 @@ class Contract:
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
         return {
-            'staff_name': self.staff_name,
-            'client_company': self.client_company,
-            'contract_name': self.contract_name,
+            'staff_name': _html.unescape(self.staff_name),
+            'client_company': _html.unescape(self.client_company),
+            'contract_name': _html.unescape(self.contract_name),
             'start_date': self.start_date,
             'end_date': self.end_date,
             'total_days': self.total_days,

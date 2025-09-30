@@ -298,7 +298,15 @@ function displayValidation(validation) {
                 <div class="alert alert-danger">
                     <h6><i class="fas fa-exclamation-triangle me-2"></i>Violations</h6>
                     <ul class="mb-0">
-                        ${validation.violations.map(v => `<li>${v}</li>`).join('')}
+                        ${validation.violations.map(v => {
+                            // Check if this is an out-of-scope allocation violation
+                            if (v.includes('Day allocations found outside contract period')) {
+                                return `<li>${v} <button class="btn btn-sm btn-outline-danger ms-2" onclick="fixOutOfScopeAllocations()">
+                                    <i class="fas fa-wrench me-1"></i>Fix
+                                </button></li>`;
+                            }
+                            return `<li>${v}</li>`;
+                        }).join('')}
                     </ul>
                 </div>
             `;
@@ -412,6 +420,31 @@ async function validateContract() {
     } catch (error) {
         console.error('Error validating contract:', error);
         showFlashMessage('Error validating contract', 'danger');
+    }
+}
+
+async function fixOutOfScopeAllocations() {
+    if (confirm('Are you sure you want to remove all day allocations that are outside the contract period? This action cannot be undone.')) {
+        try {
+            const response = await fetch(`/api/contracts/${contractKey}/fix-out-of-scope`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+            
+            if (data.success) {
+                showFlashMessage(data.message, 'success');
+                // Reload contract details to refresh the validation
+                await loadContractDetails();
+            } else {
+                showFlashMessage(data.error || 'Failed to fix out-of-scope allocations', 'danger');
+            }
+        } catch (error) {
+            console.error('Error fixing out-of-scope allocations:', error);
+            showFlashMessage('Error fixing out-of-scope allocations', 'danger');
+        }
     }
 }
 

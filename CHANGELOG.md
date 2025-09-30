@@ -5,6 +5,24 @@ All notable changes to the Contract Tracker project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-09-30
+
+### Fixed
+- **Calendar Day-of-Week Display**: Fixed JavaScript calendar to correctly show Monday as first day of week
+- **Timezone Issues**: Resolved date shifting problems caused by UTC conversion in `toISOString()`
+- **Back to Contracts Navigation**: Fixed 404 error when clicking "Back to Contracts" button (trailing slash issue)
+- **Contract Key Management**: Improved contract identification system with stable `contract_id` instead of composite keys
+
+### Added
+- **Out-of-Scope Day Cleanup**: Added "Fix" button to automatically remove day allocations outside contract period
+- **Enhanced Data Integrity**: Improved contract data migration and key management
+- **Better Error Handling**: More robust contract editing and validation
+
+### Changed
+- **Contract Editing**: Now uses stable `contract_id` for updates instead of changing composite keys
+- **Date Handling**: Switched to timezone-safe date formatting to prevent UTC conversion issues
+- **API Endpoints**: Added new endpoint `/api/contracts/{key}/fix-out-of-scope` for cleanup operations
+
 ## [1.0.0] - 2025-09-30
 
 ### Added

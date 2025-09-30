@@ -220,7 +220,8 @@ class ContractCalendar {
     generateMonthWeeks(year, month, contractStart, contractEnd) {
         const firstDay = new Date(year, month - 1, 1);
         const lastDay = new Date(year, month, 0);
-        const firstWeekday = firstDay.getDay();
+        // Convert JavaScript getDay() (Sunday=0) to Monday-based (Monday=0)
+        const firstWeekday = (firstDay.getDay() + 6) % 7;
         
         const weeks = [];
         let currentWeek = [];
@@ -233,7 +234,8 @@ class ContractCalendar {
         // Add all days of the month
         for (let day = 1; day <= lastDay.getDate(); day++) {
             const currentDate = new Date(year, month - 1, day);
-            const dateString = currentDate.toISOString().split('T')[0];
+            // Use timezone-safe date formatting to avoid UTC conversion issues
+            const dateString = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             
             const dayData = {
                 day: day,

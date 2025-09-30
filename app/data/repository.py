@@ -4,6 +4,7 @@ Data access layer for persisting and retrieving application data.
 
 import json
 import os
+import uuid
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
@@ -77,46 +78,77 @@ class ContractRepository(BaseRepository):
         """Get all contracts."""
         data = self._load_data()
         contracts = {}
+        needs_save = False
         
         for key, contract_data in data.items():
             try:
-                contracts[key] = Contract.from_dict(contract_data)
+                contract = Contract.from_dict(contract_data)
+                # Ensure contract has an ID (migration for existing contracts)
+                if not hasattr(contract, 'contract_id') or contract.contract_id is None:
+                    contract.contract_id = str(uuid.uuid4())
+                    needs_save = True
+                contracts[key] = contract
             except (KeyError, ValueError) as e:
                 print(f"Error loading contract {key}: {e}")
                 continue
         
+        # Save back if we added IDs to existing contracts
+        if needs_save:
+            self._save_data({k: v.to_dict() for k, v in contracts.items()})
+        
         return contracts
     
     def get_contract(self, contract_key: str) -> Optional[Contract]:
-        """Get a specific contract by key."""
+        """Get a specific contract by key (contract_id or computed contract_key)."""
         data = self._load_data()
+        
+        # First try direct lookup by key (could be contract_id or legacy contract_key)
         contract_data = data.get(contract_key)
         
         if contract_data is None:
-            # Fallback: find by stored 'contract_key' field (in case of legacy key formats)
+            # Fallback: search through all contracts to find one with matching computed contract_key
             for k, v in data.items():
                 try:
-                    if isinstance(v, dict) and v.get('contract_key') == contract_key:
-                        contract_data = v
-                        break
+                    if isinstance(v, dict):
+                        # Create a temporary contract to compute its contract_key
+                        temp_contract = Contract.from_dict(v)
+                        if temp_contract.contract_key == contract_key:
+                            contract_data = v
+                            break
                 except Exception:
                     continue
-            if contract_data is None:
-                return None
+                    
+        if contract_data is None:
+            return None
         
         try:
-            return Contract.from_dict(contract_data)
+            contract = Contract.from_dict(contract_data)
+            # Ensure contract has an ID (migration for existing contracts)
+            # Only generate new ID if the stored data doesn't have one
+            if 'contract_id' not in contract_data or contract_data['contract_id'] is None:
+                contract.contract_id = str(uuid.uuid4())
+                # Update the existing contract data in place
+                contract_data['contract_id'] = contract.contract_id
+                # Save the updated data back to the file
+                data = self._load_data()
+                data[contract_key] = contract_data
+                self._save_data(data)
+            return contract
         except (KeyError, ValueError) as e:
             print(f"Error loading contract {contract_key}: {e}")
             return None
     
     def save_contract(self, contract: Contract) -> bool:
         """Save a contract with sanitized data."""
-        # Sanitize contract key before using it
-        sanitized_key = DataSanitizer.sanitize_string(contract.contract_key)
-        
         data = self._load_data()
-        data[sanitized_key] = contract.to_dict()
+        
+        # Use contract_id as key if available, otherwise use sanitized contract_key
+        if contract.contract_id:
+            key = contract.contract_id
+        else:
+            key = DataSanitizer.sanitize_string(contract.contract_key)
+        
+        data[key] = contract.to_dict()
         return self._save_data(data)
     
     def update_contract(self, contract: Contract) -> bool:

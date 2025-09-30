@@ -24,6 +24,7 @@ def create_web_app():
         return render_template('dashboard/index.html')
     
     @app.route('/contracts')
+    @app.route('/contracts/')
     def contracts_index():
         """Contracts index page."""
         return render_template('contracts/index.html')

@@ -60,8 +60,6 @@ class Contract:
     end_date: str    # YYYY-MM-DD format
     total_days: int
     daily_rate: int
-    # Stable unique identifier (assigned on first load/save)
-    contract_id: Optional[str] = None
     
     # Day allocations
     days: Dict[str, DayAllocation] = None
@@ -72,6 +70,7 @@ class Contract:
     # Metadata
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
+    contract_id: Optional[str] = None
     
     def __post_init__(self):
         """Initialize after dataclass creation."""
@@ -88,6 +87,16 @@ class Contract:
         if self.created_at is None:
             self.created_at = now
         self.updated_at = now
+
+    @property
+    def contract_key(self) -> str:
+        """Generate contract key from staff_name, client_company, and contract_name."""
+        from ..utils.sanitization import DataSanitizer
+        # Create the key from the three main fields
+        key_parts = [self.staff_name, self.client_company, self.contract_name]
+        raw_key = "_".join(key_parts)
+        # Sanitize the key to make it safe for use as a dictionary key
+        return DataSanitizer.sanitize_string(raw_key)
 
     def _validate_inputs(self):
         """Validate input data (sanitization done at API level)."""
@@ -275,7 +284,6 @@ class Contract:
         """Convert to dictionary for JSON serialization."""
         return {
             'contract_id': self.contract_id,
-            'contract_key': self.contract_key,
             'staff_name': _html.unescape(self.staff_name),
             'client_company': _html.unescape(self.client_company),
             'contract_name': _html.unescape(self.contract_name),

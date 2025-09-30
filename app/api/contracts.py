@@ -204,25 +204,30 @@ def get_contract_by_id(contract_id: str):
 @contracts_bp.route('/id/<contract_id>', methods=['PUT'])
 def update_contract_by_id(contract_id: str):
     try:
-        # Iterate to find contract by id
+        # First try to get contract directly by ID as key
         contracts = current_app.data_manager.get_all_contracts()
-        target_key = None
-        for key, contract in contracts.items():
-            if contract.contract_id == contract_id:
-                target_key = key
-                break
-        if not target_key:
+        contract = contracts.get(contract_id)
+        
+        if not contract:
+            # Fallback: iterate to find contract by id field
+            for key, c in contracts.items():
+                if c.contract_id == contract_id:
+                    contract = c
+                    break
+        
+        if not contract:
             return jsonify({'success': False, 'error': 'Contract not found'}), 404
 
-        contract = current_app.data_manager.get_contract(target_key)
         data = request.get_json() or {}
         updatable_fields = ['staff_name', 'client_company', 'contract_name',
                            'start_date', 'end_date', 'total_days', 'daily_rate']
         for field in updatable_fields:
             if field in data:
                 setattr(contract, field, data[field])
-        if current_app.data_manager.update_contract_under_key(target_key, contract):
-            return jsonify({'success': True, 'contract': contract.to_dict(), 'contract_key': target_key})
+        
+        # Save the updated contract (will use contract_id as key)
+        if current_app.data_manager.save_contract(contract):
+            return jsonify({'success': True, 'contract': contract.to_dict(), 'contract_id': contract.contract_id})
         return jsonify({'success': False, 'error': 'Failed to update contract'}), 500
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -532,6 +537,65 @@ def unarchive_contract(contract_key: str):
             return jsonify({
                 'success': False,
                 'error': 'Failed to save unarchived contract'
+            }), 500
+    
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+@contracts_bp.route('/<contract_key>/fix-out-of-scope', methods=['POST'])
+def fix_out_of_scope_allocations(contract_key: str):
+    """Remove day allocations that are outside the contract period."""
+    try:
+        # Sanitize contract key
+        contract_key = DataSanitizer.sanitize_string(contract_key)
+        
+        contract = current_app.data_manager.get_contract(contract_key)
+        
+        if not contract:
+            return jsonify({
+                'success': False,
+                'error': 'Contract not found'
+            }), 404
+        
+        # Check if contract is archived
+        if contract.is_archived():
+            return jsonify({
+                'success': False,
+                'error': 'Cannot modify archived contract'
+            }), 403
+        
+        # Find and remove out-of-scope allocations
+        from datetime import datetime
+        out_of_scope_dates = []
+        
+        for date_str in list(contract.days.keys()):
+            date = datetime.strptime(date_str, '%Y-%m-%d')
+            if date < contract.start_datetime or date > contract.end_datetime:
+                out_of_scope_dates.append(date_str)
+                del contract.days[date_str]
+        
+        if not out_of_scope_dates:
+            return jsonify({
+                'success': True,
+                'message': 'No out-of-scope allocations found',
+                'removed_dates': []
+            })
+        
+        # Save the updated contract
+        if current_app.data_manager.save_contract(contract):
+            return jsonify({
+                'success': True,
+                'message': f'Removed {len(out_of_scope_dates)} out-of-scope day allocation(s)',
+                'removed_dates': sorted(out_of_scope_dates),
+                'contract': contract.to_dict()
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Failed to save updated contract'
             }), 500
     
     except Exception as e:

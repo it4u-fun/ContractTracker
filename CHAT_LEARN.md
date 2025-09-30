@@ -86,6 +86,9 @@ python run.py
 - Use the Chrome agent to validate UI states, console/network, and performance.
 - Keep documentation concise and current in `CHAT_LEARN.md`, `README.md`, and `API.md`.
 - Prefer conventional commits and small, focused edits.
+- **Debugging workflow**: When issues arise, use Chrome agent to reproduce, check Docker logs, and test fixes systematically.
+- **Data integrity**: Always verify changes in the actual data files (`./data/*.json`) and test with real data.
+- **Cross-browser compatibility**: Test JavaScript fixes with timezone-safe date handling and proper weekday calculations.
 
 ### Git workflow (docs-first)
 Always update relevant docs alongside code changes, then commit:

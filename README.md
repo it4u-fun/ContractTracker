@@ -322,6 +322,16 @@ For support or questions:
 - Modern responsive web interface
 - RESTful API for external integration
 
+## Recent Changes
+
+### v1.2.0 - Enhanced Contract Management
+- **Fixed**: Calendar day-of-week calculations now correctly display Monday as first day of week
+- **Fixed**: Timezone-safe date handling prevents date shifting issues
+- **Added**: "Fix" button for out-of-scope day allocations with automatic cleanup
+- **Improved**: Contract editing now uses stable `contract_id` instead of composite keys
+- **Fixed**: "Back to Contracts" button now works correctly (handles trailing slash)
+- **Enhanced**: Data integrity with proper contract key management and migration
+
 ---
 
 **Built with ❤️ for contractors by contractors**

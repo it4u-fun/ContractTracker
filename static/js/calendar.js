@@ -418,7 +418,7 @@ class ContractCalendar {
                 </div>
                 ${month.weeks.map(week => `
                     <div class="row">
-                        ${week.map(day => day ? this.createDayElement(day) : '<div class="col calendar-day"></div>').join('')}
+                        ${week.map(day => day ? this.createDayElement(day) : '<div class="col calendar-day disabled"></div>').join('')}
                     </div>
                 `).join('')}
             </div>

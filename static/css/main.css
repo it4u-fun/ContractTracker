@@ -85,11 +85,18 @@ body {
     margin-bottom: 0.75rem;
 }
 
+.contract-status {
+    flex: 1;
+    text-align: center;
+    margin-left: 1rem;
+}
+
 .contract-status .badge {
-    font-size: 0.875rem;
+    font-size: 1rem;
     font-weight: 700;
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem 1rem;
     border: 1px solid rgba(0, 0, 0, 0.2);
+    min-width: 150px;
 }
 
 .contract-status .badge.bg-warning {

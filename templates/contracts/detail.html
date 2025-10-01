@@ -61,11 +61,15 @@
             <div class="card-body">
                 <div class="text-center mb-3">
                     <h3 class="text-primary" id="working-days-count">0</h3>
-                    <small class="text-muted">Working Days</small>
+                    <small class="text-muted">Working Days Allocated</small>
+                </div>
+                <div class="text-center mb-3">
+                    <h3 class="text-info" id="total-days-stat">0</h3>
+                    <small class="text-muted">Total Contract Days</small>
                 </div>
                 <div class="text-center mb-3">
                     <h3 class="text-warning" id="remaining-days">0</h3>
-                    <small class="text-muted">Remaining</small>
+                    <small class="text-muted">Remaining to Allocate</small>
                 </div>
                 <div class="text-center">
                     <span id="balance-status" class="badge bg-secondary">Unknown</span>
@@ -232,6 +236,7 @@ async function loadContractDetails() {
             
             // Update stats
             document.getElementById('working-days-count').textContent = contract.working_days_count;
+            document.getElementById('total-days-stat').textContent = contract.total_days;
             if (typeof contract.remaining_working_days === 'number') {
                 document.getElementById('remaining-days').textContent = contract.remaining_working_days;
             }

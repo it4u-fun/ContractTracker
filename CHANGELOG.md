@@ -99,6 +99,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Custom Holidays: Editing a holiday failed with `NameError: name 'CustomHoliday' is not defined` when saving. Added missing import in `app/data/repository.py` so updates work correctly.
+
 ### Planned Features
 - **Invoice Generation**: Create PDF invoices automatically
 - **UK Bank Holiday Integration**: Real-time holiday data from gov.uk API

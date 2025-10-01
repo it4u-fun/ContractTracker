@@ -10,7 +10,7 @@ from datetime import datetime
 
 from ..models.contract import Contract
 from ..models.settings import ApplicationSettings
-from ..models.custom_holidays import CustomHolidayCollection
+from ..models.custom_holidays import CustomHolidayCollection, CustomHoliday
 from ..utils.sanitization import DataSanitizer
 
 class BaseRepository:

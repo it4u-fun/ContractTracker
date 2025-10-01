@@ -38,7 +38,6 @@ class SettingsForm {
 
         // Holiday settings
         document.getElementById('max_holiday_weeks').value = settings.max_holiday_weeks || 2;
-        document.getElementById('holiday_gap_weeks').value = settings.holiday_gap_weeks || 1;
 
         // Calendar settings
         document.getElementById('week_starts_monday').checked = settings.week_starts_monday !== false;
@@ -104,7 +103,6 @@ class SettingsForm {
             vat_rate: parseInt(document.getElementById('vat_rate')?.value) || 20,
             daily_rate: parseFloat(document.getElementById('daily_rate')?.value) || 575,
             max_holiday_weeks: parseInt(document.getElementById('max_holiday_weeks')?.value) || 2,
-            holiday_gap_weeks: parseInt(document.getElementById('holiday_gap_weeks')?.value) || 1,
             week_starts_monday: document.getElementById('week_starts_monday')?.checked !== false,
             show_weekends: document.getElementById('show_weekends')?.checked !== false,
             enabled_data_sources: enabledSources

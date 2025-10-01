@@ -131,7 +131,7 @@ def update_settings():
         # Update settings
         updatable_fields = [
             'financial_year_start', 'vat_rate', 'daily_rate',
-            'max_holiday_weeks', 'holiday_gap_weeks',
+            'max_holiday_weeks',
             'week_starts_monday', 'show_weekends', 'enabled_data_sources'
         ]
         

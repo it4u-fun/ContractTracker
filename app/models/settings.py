@@ -17,7 +17,6 @@ class ApplicationSettings:
     
     # Holiday constraints
     max_holiday_weeks: int = 2
-    holiday_gap_weeks: int = 1
     
     # Calendar settings
     week_starts_monday: bool = True
@@ -84,7 +83,6 @@ class ApplicationSettings:
             'vat_rate': self.vat_rate,
             'daily_rate': self.daily_rate,
             'max_holiday_weeks': self.max_holiday_weeks,
-            'holiday_gap_weeks': self.holiday_gap_weeks,
             'week_starts_monday': self.week_starts_monday,
             'show_weekends': self.show_weekends,
             'enabled_data_sources': self.enabled_data_sources,
@@ -100,7 +98,6 @@ class ApplicationSettings:
             vat_rate=data.get('vat_rate', 20),
             daily_rate=data.get('daily_rate', 575),
             max_holiday_weeks=data.get('max_holiday_weeks', 2),
-            holiday_gap_weeks=data.get('holiday_gap_weeks', 1),
             week_starts_monday=data.get('week_starts_monday', True),
             show_weekends=data.get('show_weekends', True),
             enabled_data_sources=data.get('enabled_data_sources', {

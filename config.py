@@ -22,8 +22,7 @@ class Config:
         'financial_year_start': '15-Jul',
         'vat_rate': 20,
         'daily_rate': 575,
-        'max_holiday_weeks': 2,
-        'holiday_gap_weeks': 1
+        'max_holiday_weeks': 2
     }
     
     # Day status configuration

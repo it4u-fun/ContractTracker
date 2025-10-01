@@ -117,19 +117,6 @@ class ValidationService:
                     f"({period_length} days). Maximum allowed is {max_period_length} days."
                 )
         
-        # Check gaps between holiday periods
-        min_gap_days = 7
-        for i in range(len(holiday_periods) - 1):
-            current_end = datetime.strptime(holiday_periods[i]['end'], '%Y-%m-%d')
-            next_start = datetime.strptime(holiday_periods[i + 1]['start'], '%Y-%m-%d')
-            gap_days = (next_start - current_end).days - 1
-            
-            if gap_days < min_gap_days:
-                violations.append(
-                    f"Insufficient gap between holiday periods: "
-                    f"{holiday_periods[i]['end']} to {holiday_periods[i + 1]['start']} "
-                    f"({gap_days} days). Minimum gap required is {min_gap_days} days."
-                )
         
         # Check total holiday days
         total_holiday_days = len(contract.get_days_by_status(DayStatus.HOLIDAY))

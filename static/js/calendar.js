@@ -313,6 +313,22 @@ class ContractCalendar {
         return workingDays;
     }
 
+    // Count business days (Mon-Fri) between two YYYY-MM-DD dates inclusive
+    calculateBusinessDaysInRange(startDateStr, endDateStr) {
+        const start = new Date(startDateStr + 'T00:00:00');
+        const end = new Date(endDateStr + 'T00:00:00');
+        let count = 0;
+        const current = new Date(start);
+        while (current <= end) {
+            const day = current.getDay(); // 0=Sun, 6=Sat
+            if (day !== 0 && day !== 6) {
+                count++;
+            }
+            current.setDate(current.getDate() + 1);
+        }
+        return count;
+    }
+
     generateMonthWeeks(year, month, contractStart, contractEnd) {
         const firstDay = new Date(year, month - 1, 1);
         const lastDay = new Date(year, month, 0);
@@ -377,7 +393,9 @@ class ContractCalendar {
         document.getElementById('contract-info').textContent = 
             `${this.contract.client_company} - ${this.contract.contract_name}`;
         
-        document.getElementById('working-days-count').textContent = this.contract.working_days_count || 0;
+        // Show the number of business (Mon-Fri) days in the contract period
+        const businessDays = this.calculateBusinessDaysInRange(this.contract.start_date, this.contract.end_date);
+        document.getElementById('working-days-count').textContent = businessDays;
         document.getElementById('remaining-days').textContent = this.contract.remaining_working_days || 0;
         document.getElementById('total-allowed').textContent = this.contract.total_days || 0;
         

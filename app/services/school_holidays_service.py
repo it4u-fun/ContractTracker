@@ -33,7 +33,9 @@ def expand_dates(start_iso: str, end_iso: str) -> List[str]:
     return dates
 
 def extract_holiday_dates(start_date: str, end_date: str) -> Dict[str, Dict]:
-    """Return dict of date -> {'type': 'school_holiday', 'label': name} for closures."""
+    """Return dict of date -> details for closures.
+    details: { 'type': 'school_holiday', 'label': name }
+    """
     data = fetch_events(start_date, end_date)
     flags: Dict[str, Dict] = {}
     for item in data.get('result', []):

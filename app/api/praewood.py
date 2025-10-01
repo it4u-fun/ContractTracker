@@ -1,6 +1,7 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request, current_app
 import requests
 from datetime import datetime, timedelta
+from ..services.school_holidays_service import extract_holiday_dates
 
 praewood_bp = Blueprint('praewood', __name__, url_prefix='/api/praewood')
 
@@ -45,6 +46,22 @@ def list_types():
             if name:
                 names.add(name)
         return jsonify({'success': True, 'months': months, 'distinct_names': sorted(names)})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 502
+
+@praewood_bp.route('/flags', methods=['GET'])
+def flags():
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+    if not start_date or not end_date:
+        return jsonify({'success': False, 'error': 'start_date and end_date are required (YYYY-MM-DD)'}), 400
+    try:
+        flags = extract_holiday_dates(start_date, end_date)
+        # Merge into cache
+        current_app.data_manager.merge_praewood_dates(flags)
+        # Respond with rich details
+        sorted_items = sorted(flags.items())
+        return jsonify({'success': True, 'flags': [{ 'date': d, **details } for d, details in sorted_items]})
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 502
 

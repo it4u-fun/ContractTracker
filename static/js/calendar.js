@@ -138,8 +138,11 @@ class ContractCalendar {
     async getSchoolHolidays(startDate, endDate) {
         try {
             const resp = await Utils.apiRequest(`/api/praewood/flags?start_date=${startDate}&end_date=${endDate}`);
-            if (resp.success && resp.dates) {
-                return resp.dates;
+            if (resp.success && resp.flags) {
+                // We only need an array of dates for grid marking,
+                // but keep full flags if needed later
+                this.praewoodFlagDetails = resp.flags;
+                return resp.flags.map(f => f.date);
             }
         } catch (e) {
             console.warn('Failed to fetch PraeWood school holidays', e);

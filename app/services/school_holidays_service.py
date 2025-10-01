@@ -1,25 +1,19 @@
 import requests
+import re
 from datetime import datetime, timedelta
 from typing import List, Dict
 
-SCHOOLJOTTER_URL = 'https://api.schooljotter3.com/api/events_occurrences'
-SCHOOLJOTTER_HEADERS = {
-    'accept': 'application/json',
-    'origin': 'https://www.praewood.herts.sch.uk',
-    'user-agent': 'ContractTracker/1.0 (+https://localhost)',
-    'x-tenant': 'c4547ee8-0cc9-46b4-88ad-fdaf3e9788a8',
-    'x-timezone': 'Europe/London',
-}
+# Source page for official term dates
+PRAEWOOD_TERMDATES_URL = 'https://www.praewood.herts.sch.uk/termdatescalendar/term-dates'
 
 HOLIDAY_KEYWORDS = (
     'HALF TERM', 'HOLIDAY', 'TERM ENDS', 'TERM START', 'INSET DAY', 'BANK HOLIDAY'
 )
 
-def fetch_events(start_date: str, end_date: str) -> Dict:
-    params = {'start_date': start_date, 'end_date': end_date}
-    resp = requests.get(SCHOOLJOTTER_URL, params=params, headers=SCHOOLJOTTER_HEADERS, timeout=15)
+def fetch_terms_page() -> str:
+    resp = requests.get(PRAEWOOD_TERMDATES_URL, timeout=20)
     resp.raise_for_status()
-    return resp.json()
+    return resp.text
 
 def expand_dates(start_iso: str, end_iso: str) -> List[str]:
     # Normalize to date portion in Europe/London (api already offsets).
@@ -32,26 +26,69 @@ def expand_dates(start_iso: str, end_iso: str) -> List[str]:
         current += timedelta(days=1)
     return dates
 
+def _strip_ordinal(day_str: str) -> str:
+    return re.sub(r'(st|nd|rd|th)$', '', day_str)
+
+def _month_to_num(month_name: str) -> int:
+    return datetime.strptime(month_name[:3], '%b').month
+
+def _parse_date_fragment(fragment: str, default_year: int) -> datetime:
+    # e.g. "27th October 2025" or "27th October"
+    parts = fragment.strip().split()
+    if len(parts) < 2:
+        raise ValueError('Bad date fragment')
+    day = int(_strip_ordinal(parts[0]))
+    month = _month_to_num(parts[1])
+    year = default_year if len(parts) == 2 else int(parts[2])
+    return datetime(year, month, day)
+
 def extract_holiday_dates(start_date: str, end_date: str) -> Dict[str, Dict]:
-    """Return dict of date -> details for closures.
-    details: { 'type': 'school_holiday', 'label': name }
-    """
-    data = fetch_events(start_date, end_date)
-    flags: Dict[str, Dict] = {}
-    for item in data.get('result', []):
-        name = (item.get('name') or '').strip()
-        if not name:
-            continue
-        if not any(keyword in name.upper() for keyword in HOLIDAY_KEYWORDS):
-            continue
-        occur = item.get('occurences') or []
-        for occ in occur:
-            s = occ.get('start')
-            e = occ.get('end')
-            if not s or not e:
+    """Scrape the term-dates page and return date -> {type,label}."""
+    html = fetch_terms_page()
+
+    # Find section year markers like "Autumn Term 2025", "Spring Term 2026"
+    year_markers = list(re.finditer(r'(Autumn|Spring|Summer)\s+Term\s+(\d{4})', html, re.IGNORECASE))
+    # Split the page into blocks per year marker
+    blocks = []
+    for i, m in enumerate(year_markers):
+        start_idx = m.end()
+        end_idx = year_markers[i+1].start() if i+1 < len(year_markers) else len(html)
+        year = int(m.group(2))
+        blocks.append((year, html[start_idx:end_idx]))
+
+    wanted = {}
+    window_start = datetime.fromisoformat(start_date)
+    window_end = datetime.fromisoformat(end_date)
+
+    # Patterns for half term date ranges
+    # e.g. "Half Term 27th October – 31st October 2025"
+    range_pat = re.compile(r'Half\s*Term\s+([0-9]{1,2}\w{2}?\s+\w+)\s*[–-]\s*([0-9]{1,2}\w{2}?\s+\w+)(?:\s+(\d{4}))?', re.IGNORECASE)
+    # Single day INSET / Public Holiday etc.
+    single_pat = re.compile(r'\b(Inset Day|Public Holiday|Occasional Day)\b[^\n\r]*?([0-9]{1,2}\w{2}?\s+\w+\s+\d{4}|[0-9]{1,2}\w{2}?\s+\w+)', re.IGNORECASE)
+
+    for year, block in blocks:
+        # Half Term ranges
+        for m in range_pat.finditer(block):
+            start_frag, end_frag, end_year_opt = m.groups()
+            start_dt = _parse_date_fragment(start_frag, year)
+            end_year = int(end_year_opt) if end_year_opt else year
+            end_dt = _parse_date_fragment(end_frag, end_year)
+            # Clip to requested window
+            cur = max(start_dt, window_start)
+            while cur <= end_dt and cur <= window_end:
+                wanted[cur.date().isoformat()] = {'type': 'school_holiday', 'label': 'HALF TERM'}
+                cur += timedelta(days=1)
+
+        # Single-day items
+        for m in single_pat.finditer(block):
+            label, frag = m.groups()
+            try:
+                dt = _parse_date_fragment(frag, year)
+            except Exception:
                 continue
-            for d in expand_dates(s, e):
-                flags[d] = {'type': 'school_holiday', 'label': name}
-    return flags
+            if window_start.date() <= dt.date() <= window_end.date():
+                wanted[dt.date().isoformat()] = {'type': 'school_holiday', 'label': label.upper()}
+
+    return wanted
 
 

@@ -70,9 +70,9 @@ class ContractCalendar {
                     );
                 }
                 
-                // Load School Holidays if enabled (placeholder for now)
+                // Load School Holidays if enabled
                 if (settings.enabled_data_sources.praewood_school) {
-                    this.dataSourceFlags.school_holidays = this.getSchoolHolidays(
+                    this.dataSourceFlags.school_holidays = await this.getSchoolHolidays(
                         this.contract.start_date, 
                         this.contract.end_date
                     );
@@ -135,9 +135,15 @@ class ContractCalendar {
         return holidays.filter(date => date >= startDate && date <= endDate);
     }
     
-    getSchoolHolidays(startDate, endDate) {
-        // Placeholder for PraeWood School holidays
-        // This would be populated from actual school calendar data
+    async getSchoolHolidays(startDate, endDate) {
+        try {
+            const resp = await Utils.apiRequest(`/api/praewood/flags?start_date=${startDate}&end_date=${endDate}`);
+            if (resp.success && resp.dates) {
+                return resp.dates;
+            }
+        } catch (e) {
+            console.warn('Failed to fetch PraeWood school holidays', e);
+        }
         return [];
     }
     

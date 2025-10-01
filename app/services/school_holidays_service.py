@@ -36,10 +36,6 @@ class SchoolHolidaysService:
         try:
             html = self._http_get(PRAEWOOD_TERMDATES_URL)
             soup = BeautifulSoup(html, "html.parser")
-            try:
-                print(f"[PraeWood] fetch_events_from_website: html_len={len(html)}")
-            except Exception:
-                pass
 
             # Build patterns
             dash = r"[\-\u2013\u2014]"
@@ -161,10 +157,6 @@ class SchoolHolidaysService:
                             block.append(contents[j])
                             j += 1
                         block_text = ' '.join(block)
-                        try:
-                            print(f"[PraeWood] label={label} excerpt={block_text[:160]}")
-                        except Exception:
-                            pass
                         if not try_extract_from_text(label, block_text):
                             # Try line by line as fallback
                             for k in range(i+1, j):
@@ -187,7 +179,6 @@ class SchoolHolidaysService:
                     page_text = soup.get_text("\n", strip=True)
                     page_text = page_text.replace("\u2013", "-").replace("\u2014", "-")
                     lines = [ln for ln in (t.strip() for t in page_text.split("\n")) if ln]
-                    print(f"[PraeWood] fallback line-scan lines={len(lines)}")
 
                     # Expand label detection to inline mentions too
                     label_matchers = [
@@ -231,10 +222,6 @@ class SchoolHolidaysService:
                             j += 1
 
                         block_text = " ".join(window)
-                        try:
-                            print(f"[PraeWood] fallback label={matched_label} excerpt={block_text[:200]}")
-                        except Exception:
-                            pass
 
                         # Try patterns on block first
                         if not try_extract_from_text(matched_label, block_text):
@@ -287,16 +274,9 @@ class SchoolHolidaysService:
                                     matched_count += 1
 
                         i = j
-                except Exception as ex:
-                    try:
-                        print(f"[PraeWood] fallback scan error: {ex}")
-                    except Exception:
-                        pass
+                except Exception:
+                    pass
 
-            try:
-                print(f"[PraeWood] parsed events: {len(events)}, matched_lines={matched_count}")
-            except Exception:
-                pass
             return events
         except requests.RequestException as e:
             # Surface as empty; caller can decide caching behavior

@@ -1,68 +1,93 @@
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any, Dict, List
+
 from flask import Blueprint, jsonify, request, current_app
-import requests
-from datetime import datetime, timedelta
-from ..services.school_holidays_service import extract_holiday_dates
 
-praewood_bp = Blueprint('praewood', __name__, url_prefix='/api/praewood')
+from ..services.school_holidays_service import SchoolHolidaysService
 
-SCHOOLJOTTER_URL = 'https://api.schooljotter3.com/api/events_occurrences'
-SCHOOLJOTTER_HEADERS = {
-    'accept': 'application/json',
-    'origin': 'https://www.praewood.herts.sch.uk',
-    'user-agent': 'ContractTracker/1.0 (+https://localhost)',
-    'x-tenant': 'c4547ee8-0cc9-46b4-88ad-fdaf3e9788a8',
-    'x-timezone': 'Europe/London',
-}
 
-def _fetch_events(start_date: str, end_date: str):
-    params = {'start_date': start_date, 'end_date': end_date}
-    resp = requests.get(SCHOOLJOTTER_URL, params=params, headers=SCHOOLJOTTER_HEADERS, timeout=15)
-    resp.raise_for_status()
-    return resp.json()
+praewood_bp = Blueprint("praewood", __name__, url_prefix="/api/praewood")
 
-@praewood_bp.route('/events', methods=['GET'])
-def events():
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    if not start_date or not end_date:
-        return jsonify({'success': False, 'error': 'start_date and end_date are required (YYYY-MM-DD)'}), 400
+
+def _save_full_cache(entries: List[Dict[str, Any]]) -> Dict[str, Any]:
+    """Save the entire dates map {date: {type,label}} with updated_at."""
+    from ..data.repository import BaseRepository
+
+    class PraeWoodRepository(BaseRepository):
+        def __init__(self, data_dir: str):
+            super().__init__(data_dir, "praewood_dates.json")
+
+    dm = getattr(current_app, "data_manager", None)
+    data_dir = dm.data_dir if dm is not None else current_app.config.get("DATA_DIR", "data")
+    repo = PraeWoodRepository(data_dir)
+
+    date_map: Dict[str, Dict[str, str]] = {}
+    for e in entries:
+        date_map[e["date"]] = {"type": e.get("type", "school_holiday"), "label": e.get("label", "School Holiday")}
+
+    payload = {"dates": date_map, "updated_at": datetime.now().isoformat()}
+    repo._save_data(payload)
+    return payload
+
+
+@praewood_bp.route("/sync", methods=["POST"]) 
+def sync_praewood_cache():
+    """Scrape the full term dates and write the entire cache file."""
+    service = SchoolHolidaysService()
+    # Scrape all events, then expand to full date flags without limiting by range
+    events = service.fetch_events_from_website()
     try:
-        data = _fetch_events(start_date, end_date)
-        return jsonify({'success': True, 'data': data})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 502
+        print(f"[PraeWood] sync events count={len(events)}")
+    except Exception:
+        pass
+    from datetime import timedelta
+    all_flags: List[Dict[str, str]] = []
+    for ev in events:
+        try:
+            start = datetime.strptime(ev["start"], "%Y-%m-%d")
+            end = datetime.strptime(ev["end"], "%Y-%m-%d")
+        except (KeyError, ValueError):
+            continue
+        cur = start
+        while cur <= end:
+            all_flags.append({
+                "date": cur.strftime("%Y-%m-%d"),
+                "type": "school_holiday",
+                "label": ev.get("name", "SCHOOL HOLIDAY").upper(),
+            })
+            cur = cur + timedelta(days=1)
 
-@praewood_bp.route('/types', methods=['GET'])
-def list_types():
-    # default: last 12 months
-    months = int(request.args.get('months', '12'))
-    end = datetime.utcnow().date()
-    start = end - timedelta(days=months*30)
     try:
-        data = _fetch_events(start.isoformat(), end.isoformat())
-        names = set()
-        for item in data.get('result', []):
-            name = (item.get('name') or '').strip()
-            if name:
-                names.add(name)
-        return jsonify({'success': True, 'months': months, 'distinct_names': sorted(names)})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 502
+        print(f"[PraeWood] sync total flags={len(all_flags)}")
+    except Exception:
+        pass
+    cache = _save_full_cache(all_flags)
+    return jsonify({"success": True, "count": len(all_flags), "updated_at": cache.get("updated_at")})
 
-@praewood_bp.route('/flags', methods=['GET'])
-def flags():
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-    if not start_date or not end_date:
-        return jsonify({'success': False, 'error': 'start_date and end_date are required (YYYY-MM-DD)'}), 400
-    try:
-        flags = extract_holiday_dates(start_date, end_date)
-        # Merge into cache
-        current_app.data_manager.merge_praewood_dates(flags)
-        # Respond with rich details
-        sorted_items = sorted(flags.items())
-        return jsonify({'success': True, 'flags': [{ 'date': d, **details } for d, details in sorted_items]})
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 502
+
+@praewood_bp.route("/cache", methods=["GET"]) 
+def get_praewood_cache():
+    """Return the entire cached dates map without filtering by range."""
+    from ..data.repository import BaseRepository
+
+    class PraeWoodRepository(BaseRepository):
+        def __init__(self, data_dir: str):
+            super().__init__(data_dir, "praewood_dates.json")
+
+    dm = getattr(current_app, "data_manager", None)
+    data_dir = dm.data_dir if dm is not None else current_app.config.get("DATA_DIR", "data")
+    repo = PraeWoodRepository(data_dir)
+    data = repo._load_data() or {"dates": {}, "updated_at": None}
+    # If cache empty, attempt to sync once automatically
+    if not data.get("dates"):
+        try:
+            response = sync_praewood_cache()
+            # Reload after sync
+            data = repo._load_data() or {"dates": {}, "updated_at": None}
+        except Exception as e:
+            print(f"PraeWood auto-sync failed: {e}")
+    return jsonify({"success": True, **data})
 
 

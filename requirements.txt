@@ -17,6 +17,9 @@ python-dateutil==2.8.2
 # HTTP Requests (for external APIs)
 requests==2.31.0
 
+# HTML parsing
+beautifulsoup4==4.12.3
+
 # Environment Variables
 python-dotenv==1.0.0
 

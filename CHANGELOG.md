@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **API Endpoints**: Complete REST API for custom holidays management
 - **Data Source Toggle**: Custom holidays can be enabled/disabled in data sources
 
+## [1.3.1] - 2025-10-01
+
+### Added
+- **Calendar Export (ICS)**: Per-contract iCalendar feed for holiday days, excluding weekends
+  - Endpoint: `/api/contracts/<contract_key>/calendar.ics`
+  - Format: `text/calendar` with all-day VEVENTs and next-day DTEND
+  - Reference: [Calendar (.ics) File Structure](https://www.webdavsystem.com/server/creating_caldav_carddav/calendar_ics_file_structure/)
+
 ### Fixed
 - **Calendar Weekend Markings**: Fixed incorrect weekend detection logic
   - Friday was incorrectly being marked as weekend (W/E)

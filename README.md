@@ -119,6 +119,16 @@ docker-compose --profile with-nginx up -d
    ```
 
 ## Usage
+### Calendar Export (ICS)
+
+You can subscribe to a per-contract iCalendar feed of holiday days (weekends excluded).
+
+- Endpoint: `GET /api/contracts/<contract_key>/calendar.ics`
+- Content-Type: `text/calendar; charset=utf-8`
+- Each holiday appears as an all-day event with `DTSTART;VALUE=DATE` and next-day `DTEND;VALUE=DATE`.
+
+Reference for iCalendar structure: [Calendar (.ics) File Structure](https://www.webdavsystem.com/server/creating_caldav_carddav/calendar_ics_file_structure/)
+
 
 ### Creating Your First Contract
 
@@ -279,7 +289,6 @@ flake8 app/ tests/
 - **Invoice Generation**: Create PDF invoices automatically
 - **UK Bank Holiday Integration**: Real-time holiday data
 - **School Calendar Integration**: PraeWood School holidays
-- **Calendar Export**: ICS file generation for external calendars
 - **Multi-User Support**: Support for multiple staff members
 - **Reporting Dashboard**: Advanced analytics and reporting
 - **Mobile App**: Native mobile application

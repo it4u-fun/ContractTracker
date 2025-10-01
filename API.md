@@ -146,6 +146,38 @@ Content-Type: application/json
 DELETE /api/contracts/{contract_key}
 ```
 
+### Calendar Export (ICS)
+
+#### Get Contract Holidays as ICS
+```http
+GET /api/contracts/{contract_key}/calendar.ics
+```
+
+Returns an iCalendar (.ics) feed of holiday days for the specified contract. Weekends are excluded. Each holiday date is exported as an all-day VEVENT with next-day DTEND per iCalendar specification.
+
+Response headers:
+- `Content-Type: text/calendar; charset=utf-8`
+
+Notes:
+- Events include: holidays only (internal `DayStatus.HOLIDAY`)
+- Weekends are excluded even if present in data
+- All-day events use `DTSTART;VALUE=DATE` and `DTEND;VALUE=DATE` (exclusive end)
+
+Example VEVENT:
+```
+BEGIN:VEVENT
+UID:<contract_id>-20250715@contracttracker
+DTSTAMP:20250701T083000Z
+DTSTART;VALUE=DATE:20250715
+DTEND;VALUE=DATE:20250716
+SUMMARY:Holiday - 2025 Contract
+DESCRIPTION:Optional notes from the day allocation
+TRANSP:OPAQUE
+END:VEVENT
+```
+
+Reference for iCalendar structure: [Calendar (.ics) File Structure](https://www.webdavsystem.com/server/creating_caldav_carddav/calendar_ics_file_structure/)
+
 ### Day Management
 
 #### Update Day Status

@@ -2,8 +2,9 @@
 Contract API endpoints
 """
 
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, Response
 from typing import Dict, Any
+from datetime import datetime, timedelta
 
 from ..models.contract import Contract, DayStatus
 from ..services.validation_service import ValidationService
@@ -544,6 +545,63 @@ def unarchive_contract(contract_key: str):
             'success': False,
             'error': str(e)
         }), 500
+
+@contracts_bp.route('/<contract_key>/calendar.ics', methods=['GET'])
+def get_contract_calendar_ics(contract_key: str):
+    """Return an iCalendar (.ics) feed of holiday days for a contract (weekends excluded)."""
+    try:
+        # Sanitize contract key
+        contract_key = DataSanitizer.sanitize_string(contract_key)
+
+        contract = current_app.data_manager.get_contract(contract_key)
+        if not contract:
+            return jsonify({'success': False, 'error': 'Contract not found'}), 404
+
+        # Build VCALENDAR
+        now_utc = datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')
+        cal_lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//ContractTracker//Calendar//EN',
+            'CALSCALE:GREGORIAN',
+            f'X-WR-CALNAME:{contract.staff_name} - {contract.contract_name} Holidays',
+        ]
+
+        # One all-day VEVENT per holiday date, excluding weekends
+        holiday_days = sorted(
+            [d for d in contract.days.values() if d.status.value == 'holiday' and not d.is_weekend],
+            key=lambda d: d.date
+        )
+
+        for day in holiday_days:
+            # All-day event: DTSTART/DTEND with VALUE=DATE; DTEND is next day
+            start_dt = datetime.strptime(day.date, '%Y-%m-%d')
+            end_dt = start_dt + timedelta(days=1)
+            dtstart = start_dt.strftime('%Y%m%d')
+            dtend = end_dt.strftime('%Y%m%d')
+            uid = f'{contract.contract_id}-{dtstart}@contracttracker'
+
+            summary = f'Holiday - {contract.contract_name}'
+            description = day.notes or ''
+
+            cal_lines += [
+                'BEGIN:VEVENT',
+                f'UID:{uid}',
+                f'DTSTAMP:{now_utc}',
+                f'DTSTART;VALUE=DATE:{dtstart}',
+                f'DTEND;VALUE=DATE:{dtend}',
+                f'SUMMARY:{summary}',
+                f'DESCRIPTION:{description}',
+                'TRANSP:OPAQUE',
+                'END:VEVENT',
+            ]
+
+        cal_lines.append('END:VCALENDAR')
+        ics_text = "\r\n".join(cal_lines) + "\r\n"
+
+        return Response(ics_text, mimetype='text/calendar; charset=utf-8')
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @contracts_bp.route('/<contract_key>/fix-out-of-scope', methods=['POST'])
 def fix_out_of_scope_allocations(contract_key: str):

@@ -25,7 +25,7 @@ def create_app(config_name='default'):
     from .api.dashboard import dashboard_bp
     from .api.custom_holidays import custom_holidays_bp
     from .api.praewood import praewood_bp
-
+    
     app.register_blueprint(contracts_bp, url_prefix='/api/contracts')
     app.register_blueprint(dashboard_bp, url_prefix='/api/dashboard')
     app.register_blueprint(custom_holidays_bp)

@@ -70,7 +70,7 @@ class ContractCalendar {
                     );
                 }
                 
-                // Load School Holidays if enabled
+                // Load School Holidays if enabled (from cached PraeWood JSON)
                 if (settings.enabled_data_sources.praewood_school) {
                     this.dataSourceFlags.school_holidays = await this.getSchoolHolidays(
                         this.contract.start_date, 
@@ -137,20 +137,27 @@ class ContractCalendar {
     
     async getSchoolHolidays(startDate, endDate) {
         try {
-            const resp = await Utils.apiRequest(`/api/praewood/flags?start_date=${startDate}&end_date=${endDate}`);
-            if (resp.success && resp.flags) {
-                // Build quick lookup by date for label/tooltips
-                this.praewoodFlagDetails = resp.flags;
-                this.praewoodFlagDetailsMap = {};
-                resp.flags.forEach(f => {
-                    this.praewoodFlagDetailsMap[f.date] = f;
-                });
-                return resp.flags.map(f => f.date);
+            const response = await Utils.apiRequest(`/api/praewood/cache`);
+            if (response && response.success && response.dates) {
+                const set = new Set();
+                this.praewoodLabels = {};
+                const datesMap = response.dates;
+                const start = new Date(startDate + 'T00:00:00');
+                const end = new Date(endDate + 'T00:00:00');
+                for (const dateStr in datesMap) {
+                    // keep only dates within range
+                    const dt = new Date(dateStr + 'T00:00:00');
+                    if (dt >= start && dt <= end) {
+                        set.add(dateStr);
+                        this.praewoodLabels[dateStr] = datesMap[dateStr]?.label || 'School Holiday';
+                    }
+                }
+                return set;
             }
         } catch (e) {
-            console.warn('Failed to fetch PraeWood school holidays', e);
+            console.warn('Failed to load PraeWood cache', e);
         }
-        return [];
+        return new Set();
     }
     
     async getCustomHolidays(startDate, endDate) {
@@ -250,12 +257,10 @@ class ContractCalendar {
             
             // Check School Holidays
             if (this.dataSourceFlags.school_holidays && 
-                this.dataSourceFlags.school_holidays.includes(dateString)) {
-                const detail = (this.praewoodFlagDetailsMap && this.praewoodFlagDetailsMap[dateString]) || {};
-                const label = detail.label || 'School Holiday';
+                (this.dataSourceFlags.school_holidays.has ? this.dataSourceFlags.school_holidays.has(dateString) : this.dataSourceFlags.school_holidays.includes(dateString))) {
                 flags.push({
                     type: 'school_holiday',
-                    label: label,
+                    label: (this.praewoodLabels && this.praewoodLabels[dateString]) ? this.praewoodLabels[dateString] : 'School Holiday',
                     icon: '🎓'
                 });
             }

@@ -238,7 +238,6 @@ class DataManager:
         self.contracts = ContractRepository(data_dir)
         self.settings = SettingsRepository(data_dir)
         self.custom_holidays = CustomHolidayRepository(data_dir)
-        self.praewood = PraeWoodRepository(data_dir)
     
     def get_all_contracts(self) -> Dict[str, Contract]:
         """Get all contracts."""
@@ -288,13 +287,6 @@ class DataManager:
     def get_custom_holidays_in_range(self, start_date: str, end_date: str) -> List[Dict[str, Any]]:
         """Get custom holidays within a date range."""
         return self.custom_holidays.get_holidays_in_range(start_date, end_date)
-
-    # PraeWood helpers
-    def get_praewood_all_dates(self) -> Dict[str, Any]:
-        return self.praewood.get_all_dates()
-
-    def merge_praewood_dates(self, dates_map: Dict[str, Any]) -> bool:
-        return self.praewood.merge_dates(dates_map)
     
     def backup_data(self, backup_dir: str) -> bool:
         """Create a backup of all data."""
@@ -443,31 +435,3 @@ class CustomHolidayRepository(BaseRepository):
         except Exception as e:
             print(f"Error getting holidays in range: {e}")
             return []
-
-class PraeWoodRepository(BaseRepository):
-    """Repository for caching PraeWood school holiday dates."""
-
-    def __init__(self, data_dir: str):
-        super().__init__(data_dir, 'praewood_dates.json')
-
-    def get_all_dates(self) -> Dict[str, Any]:
-        data = self._load_data()
-        if not data:
-            return {'dates': {}, 'updated_at': datetime.utcnow().isoformat()}
-        if 'dates' not in data:
-            data = {'dates': data, 'updated_at': datetime.utcnow().isoformat()}
-        return data
-
-    def merge_dates(self, dates_map: Dict[str, Any]) -> bool:
-        data = self.get_all_dates()
-        existing = data.get('dates', {})
-        changed = False
-        for d, details in dates_map.items():
-            if d not in existing or existing[d] != details:
-                existing[d] = details
-                changed = True
-        if changed:
-            data['dates'] = existing
-            data['updated_at'] = datetime.utcnow().isoformat()
-            return self._save_data(data)
-        return True

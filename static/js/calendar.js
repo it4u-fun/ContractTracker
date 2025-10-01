@@ -139,9 +139,12 @@ class ContractCalendar {
         try {
             const resp = await Utils.apiRequest(`/api/praewood/flags?start_date=${startDate}&end_date=${endDate}`);
             if (resp.success && resp.flags) {
-                // We only need an array of dates for grid marking,
-                // but keep full flags if needed later
+                // Build quick lookup by date for label/tooltips
                 this.praewoodFlagDetails = resp.flags;
+                this.praewoodFlagDetailsMap = {};
+                resp.flags.forEach(f => {
+                    this.praewoodFlagDetailsMap[f.date] = f;
+                });
                 return resp.flags.map(f => f.date);
             }
         } catch (e) {
@@ -248,9 +251,11 @@ class ContractCalendar {
             // Check School Holidays
             if (this.dataSourceFlags.school_holidays && 
                 this.dataSourceFlags.school_holidays.includes(dateString)) {
+                const detail = (this.praewoodFlagDetailsMap && this.praewoodFlagDetailsMap[dateString]) || {};
+                const label = detail.label || 'School Holiday';
                 flags.push({
                     type: 'school_holiday',
-                    label: 'School Holiday',
+                    label: label,
                     icon: '🎓'
                 });
             }

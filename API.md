@@ -253,6 +253,23 @@ GET /api/contracts/{contract_key}/validate
 ```
 
 ### Custom Holidays
+### PraeWood School Holidays
+
+- `GET /api/praewood/types?months=12` – lists distinct event names parsed from the official term-dates page over the last N months.
+- `GET /api/praewood/flags?start_date=YYYY-MM-DD&end_date=YYYY-MM-DD` – returns rich flags for closures (HALF TERM ranges, INSET/Public/Occasional days) and merges them into a single cache file at `data/praewood_dates.json`.
+
+Response example:
+
+```json
+{
+  "success": true,
+  "flags": [
+    { "date": "2025-10-27", "type": "school_holiday", "label": "HALF TERM" },
+    { "date": "2025-10-28", "type": "school_holiday", "label": "HALF TERM" }
+  ]
+}
+```
+
 
 #### Get All Custom Holidays
 **GET** `/api/custom-holidays`

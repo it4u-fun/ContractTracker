@@ -102,6 +102,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Custom Holidays: Editing a holiday failed with `NameError: name 'CustomHoliday' is not defined` when saving. Added missing import in `app/data/repository.py` so updates work correctly.
 
+### Added
+- PraeWood data source: switched to official term dates page and added caching to `data/praewood_dates.json`.
+- New endpoints: `/api/praewood/events`, `/api/praewood/types`, `/api/praewood/flags` (returns rich flags and merges cache).
+- Calendar now displays school-holiday flag with tooltip label (e.g., "HALF TERM").
+
 ### Planned Features
 - **Invoice Generation**: Create PDF invoices automatically
 - **UK Bank Holiday Integration**: Real-time holiday data from gov.uk API

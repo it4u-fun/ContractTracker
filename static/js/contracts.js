@@ -76,10 +76,10 @@ class ContractsPage {
                     <h5 class="card-title mb-0">${contract.client_company}</h5>
                     <small class="text-muted">${contract.staff_name} - ${contract.contract_name}</small>
                 </div>
-                <div class="contract-status flex-grow-1 text-center">
+                <div class="contract-status">
                     ${contract.is_balanced ? 
-                        '<span class="badge bg-success fs-6"><i class="fas fa-check-circle me-1"></i>Balanced</span>' :
-                        `<span class="badge bg-warning fs-6"><i class="fas fa-exclamation-triangle me-1"></i>${contract.remaining_days} days remaining</span>`
+                        '<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Balanced</span>' :
+                        `<span class="badge bg-warning"><i class="fas fa-exclamation-triangle me-1"></i>${contract.remaining_days} days remaining</span>`
                     }
                 </div>
             </div>
@@ -133,6 +133,28 @@ class ContractsPage {
                             ${contract.health_score.status}
                         </span>
                     </small>
+                </div>
+            </div>
+            
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <a href="/contracts/${encodeURIComponent(contract.key)}/calendar" class="btn btn-primary btn-sm">
+                            <i class="fas fa-calendar me-1"></i>
+                            Calendar
+                        </a>
+                        <a href="/contracts/${encodeURIComponent(contract.key)}" class="btn btn-outline-secondary btn-sm ms-2">
+                            <i class="fas fa-eye me-1"></i>
+                            Details
+                        </a>
+                    </div>
+                    <div>
+                        <button class="btn btn-outline-danger btn-sm" 
+                                onclick="contractsPage.deleteContract('${contract.key}')">
+                            <i class="fas fa-trash me-1"></i>
+                            Delete
+                        </button>
+                    </div>
                 </div>
             </div>
         `;

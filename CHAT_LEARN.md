@@ -90,6 +90,10 @@ python run.py
 - **Data integrity**: Always verify changes in the actual data files (`./data/*.json`) and test with real data.
 - **Cross-browser compatibility**: Test JavaScript fixes with timezone-safe date handling and proper weekday calculations.
 
+# Python Virtual Environment
+ - use .venv as the python virtualenv
+ - "source .venv/bin/activate" to activate the Environment
+
 ### Git workflow (docs-first)
 Always update relevant docs alongside code changes, then commit:
 ```bash

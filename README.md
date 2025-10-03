@@ -12,6 +12,8 @@ A modern web application for tracking contractor days and managing contracts. Bu
 ### Core Functionality
 - **Multi-Contract Management**: Track multiple contracts simultaneously
 - **Calendar-Based Planning**: Visual calendar interface for day allocation
+- **Current Date Highlighting**: Red border and "TODAY" label for easy navigation
+- **Past Days Visual Distinction**: Past days shown with reduced opacity while maintaining full interactivity
 - **Smart Suggestions**: Automatically suggest optimal working days
 - **Constraint Validation**: Ensure contract rules are followed
 - **Financial Tracking**: Monitor earnings and contract values
@@ -332,6 +334,13 @@ For support or questions:
 - RESTful API for external integration
 
 ## Recent Changes
+
+### v1.3.2 - Enhanced Calendar UX
+- **Added**: Current date highlighting with red border and "TODAY" label
+- **Added**: Past days visual distinction with reduced opacity (70%) while maintaining full interactivity
+- **Enhanced**: Calendar visual hierarchy with clear distinction between past, present, and future days
+- **Improved**: Past days remain fully clickable and editable while being visually distinguished
+- **Technical**: Added `isCurrentDate()` and `isPastDate()` JavaScript methods for enhanced date handling
 
 ### v1.3.0 - Custom Holidays Management
 - **Added**: Custom holidays management system for user-defined holiday periods

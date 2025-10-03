@@ -5,6 +5,22 @@ All notable changes to the Contract Tracker project will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.2] - 2025-10-03
+
+### Added
+- **Current Date Highlighting**: Red border and "TODAY" label on the current date in calendar
+- **Past Days Visual Distinction**: Past days are displayed with reduced opacity (70%) while maintaining full interactivity
+- **Enhanced Calendar UX**: Clear visual distinction between past, present, and future days
+
+### Changed
+- **Calendar Styling**: Past days retain their original colors but with reduced opacity for better visual hierarchy
+- **Day Status Visibility**: Past days remain fully clickable and editable while being visually distinguished
+
+### Technical
+- Added `isCurrentDate()` and `isPastDate()` methods to calendar JavaScript
+- Enhanced CSS with `.current-date` and `.past-day` classes
+- Maintained full functionality for past day editing and status changes
+
 ## [1.3.0] - 2025-09-30
 
 ### Added

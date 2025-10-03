@@ -427,6 +427,71 @@ body {
     z-index: 5;
 }
 
+/* Current Date Styling */
+.calendar-day.current-date {
+    border: 3px solid #dc3545 !important; /* Red border for current date */
+    box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.3) !important; /* Red glow effect */
+    position: relative;
+}
+
+.calendar-day.current-date::before {
+    content: "TODAY";
+    position: absolute;
+    top: -8px;
+    right: -2px;
+    background-color: #dc3545;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    padding: 1px 4px;
+    border-radius: 2px;
+    z-index: 10;
+    line-height: 1;
+}
+
+/* Past Days Styling - Lighter but still visible */
+.calendar-day.past-day {
+    opacity: 0.7 !important; /* Slightly reduced opacity to make them lighter */
+    position: relative;
+}
+
+/* Keep all original colors but just make them lighter with opacity */
+.calendar-day.past-day.working {
+    /* Keep original green working day color but lighter */
+    background-color: rgba(40, 167, 69, 0.7) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.calendar-day.past-day.holiday {
+    /* Keep original white holiday color but lighter */
+    background-color: rgba(248, 249, 250, 0.7) !important;
+    color: rgba(0, 0, 0, 0.7) !important;
+}
+
+.calendar-day.past-day.bank_holiday {
+    /* Keep original yellow bank holiday color but lighter */
+    background-color: rgba(255, 243, 205, 0.7) !important;
+    color: rgba(0, 0, 0, 0.7) !important;
+}
+
+.calendar-day.past-day.in_lieu {
+    /* Keep original light blue in lieu color but lighter */
+    background-color: rgba(207, 244, 252, 0.7) !important;
+    color: rgba(0, 0, 0, 0.7) !important;
+}
+
+.calendar-day.past-day.on_call {
+    /* Keep original grey on call color but lighter */
+    background-color: rgba(226, 227, 229, 0.7) !important;
+    color: rgba(0, 0, 0, 0.7) !important;
+}
+
+.calendar-day.past-day.not_applicable {
+    /* Keep original light grey not applicable color but lighter */
+    background-color: rgba(248, 249, 250, 0.7) !important;
+    color: rgba(0, 0, 0, 0.7) !important;
+}
+
 /* Outside Period Styling */
 .calendar-day.outside-period {
     background-color: #d1d3d4 !important; /* Light grey for outside contract days */

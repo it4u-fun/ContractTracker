@@ -406,6 +406,18 @@ class ContractCalendar {
         return 'holiday';
     }
 
+    isCurrentDate(dateString) {
+        const today = new Date();
+        const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        return dateString === todayString;
+    }
+
+    isPastDate(dateString) {
+        const today = new Date();
+        const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        return dateString < todayString;
+    }
+
     updateContractInfo() {
         if (!this.contract) return;
 
@@ -497,6 +509,8 @@ class ContractCalendar {
         
         if (day.isWeekend) additionalClasses.push('weekend');
         if (day.isOutsidePeriod) additionalClasses.push('outside-period');
+        if (this.isCurrentDate(day.date)) additionalClasses.push('current-date');
+        if (this.isPastDate(day.date)) additionalClasses.push('past-day');
         
         // Create data source flag indicators
         let dataSourceIndicators = '';

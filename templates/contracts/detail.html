@@ -137,14 +137,6 @@
                         <i class="fas fa-calendar me-2"></i>
                         Open Calendar
                     </button>
-                    <button class="btn btn-outline-info" onclick="showSuggestions()">
-                        <i class="fas fa-lightbulb me-2"></i>
-                        Get Suggestions
-                    </button>
-                    <button class="btn btn-outline-success" onclick="validateContract()">
-                        <i class="fas fa-check-circle me-2"></i>
-                        Validate Contract
-                    </button>
                     <button class="btn btn-outline-danger" onclick="deleteContract()">
                         <i class="fas fa-trash me-2"></i>
                         Delete Contract
@@ -403,42 +395,6 @@ async function saveContractEdits() {
     }
 }
 
-async function showSuggestions() {
-    try {
-        const response = await fetch(`/api/contracts/${contractKey}/suggestions`);
-        const data = await response.json();
-        
-        if (data.success) {
-            const suggestions = data.suggestions.slice(0, 10); // Show first 10
-            showFlashMessage(
-                `Generated ${data.count} working day suggestions. First few: ${suggestions.join(', ')}...`, 
-                'info'
-            );
-        } else {
-            showFlashMessage('Failed to get suggestions', 'danger');
-        }
-    } catch (error) {
-        console.error('Error getting suggestions:', error);
-        showFlashMessage('Error getting suggestions', 'danger');
-    }
-}
-
-async function validateContract() {
-    try {
-        const response = await fetch(`/api/contracts/${contractKey}/validate`);
-        const data = await response.json();
-        
-        if (data.success) {
-            displayValidation(data.validation);
-            showFlashMessage('Contract validation completed', 'success');
-        } else {
-            showFlashMessage('Failed to validate contract', 'danger');
-        }
-    } catch (error) {
-        console.error('Error validating contract:', error);
-        showFlashMessage('Error validating contract', 'danger');
-    }
-}
 
 async function fixOutOfScopeAllocations() {
     if (confirm('Are you sure you want to remove all day allocations that are outside the contract period? This action cannot be undone.')) {

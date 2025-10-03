@@ -118,16 +118,9 @@ class ValidationService:
                 )
         
         
-        # Check total holiday days
-        total_holiday_days = len(contract.get_days_by_status(DayStatus.HOLIDAY))
-        if total_holiday_days > 0:
-            warnings.append(f"Total holiday days allocated: {total_holiday_days}")
-            
-            if total_holiday_days > 28:  # More than 4 weeks
-                warnings.append(
-                    f"High number of holiday days ({total_holiday_days}). "
-                    "Consider if this affects contract delivery."
-                )
+        # Note: Holiday day warnings removed - holidays are automatically determined 
+        # by contract requirements (total_days - working_days), so warning about 
+        # holiday days is not relevant as they cannot be controlled by the user.
         
         return {
             'violations': violations,

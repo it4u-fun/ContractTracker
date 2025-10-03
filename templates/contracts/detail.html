@@ -15,9 +15,9 @@
                     <i class="fas fa-calendar me-2"></i>
                     View Calendar
                 </a>
-                <a href="{{ url_for('contracts_index') }}" class="btn btn-secondary ms-2">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary ms-2">
                     <i class="fas fa-arrow-left me-2"></i>
-                    Back to Contracts
+                    Back to Dashboard
                 </a>
             </div>
         </div>
@@ -476,7 +476,7 @@ async function deleteContract() {
             if (data.success) {
                 showFlashMessage('Contract deleted successfully', 'success');
                 setTimeout(() => {
-                    window.location.href = '/contracts';
+                    window.location.href = '/';
                 }, 2000);
             } else {
                 showFlashMessage(data.error || 'Failed to delete contract', 'danger');

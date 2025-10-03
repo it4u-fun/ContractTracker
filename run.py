@@ -26,8 +26,9 @@ def create_web_app():
     @app.route('/contracts')
     @app.route('/contracts/')
     def contracts_index():
-        """Contracts index page."""
-        return render_template('contracts/index.html')
+        """Redirect contracts page to dashboard."""
+        from flask import redirect, url_for
+        return redirect(url_for('index'))
     
     @app.route('/contracts/new')
     def new_contract():

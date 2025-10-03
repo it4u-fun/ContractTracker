@@ -50,6 +50,11 @@ def create_web_app():
         """Settings page."""
         return render_template('settings/index.html')
     
+    @app.route('/holidays')
+    def holidays():
+        """Custom Holidays page."""
+        return render_template('holidays/index.html')
+    
     @app.route('/learn')
     def learn():
         """Learning/Onboarding page for repo usage and evolution plan."""

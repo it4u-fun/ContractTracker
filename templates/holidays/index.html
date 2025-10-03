@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Custom Holidays - Contract Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-calendar-times me-3"></i>Custom Holidays</h1>
+                <p class="text-muted">Manage your own holiday periods (e.g., EBRD Christmas closure, office shutdowns)</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addHolidayModal">
+                    <i class="fas fa-plus me-2"></i>Add Custom Holiday
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Holidays List -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list me-2"></i>
+                    Your Custom Holidays
+                </h5>
+                <div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="loadCustomHolidays()">
+                        <i class="fas fa-sync me-1"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="loading-state" class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3 text-muted">Loading custom holidays...</p>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="empty-state" class="text-center py-5" style="display: none;">
+                    <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No custom holidays yet</h4>
+                    <p class="text-muted">Create your first custom holiday to start tracking office closures and special periods.</p>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addHolidayModal">
+                        <i class="fas fa-plus me-2"></i>
+                        Add Custom Holiday
+                    </button>
+                </div>
+                
+                <!-- Holidays List -->
+                <div id="customHolidaysList" class="table-responsive">
+                    <!-- Custom holidays will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add/Edit Custom Holiday Modal -->
+<div class="modal fade" id="addHolidayModal" tabindex="-1" aria-labelledby="addHolidayModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addHolidayModalLabel">Add Custom Holiday</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="holidayForm">
+                    <input type="hidden" id="holidayId" name="holiday_id">
+                    
+                    <div class="mb-3">
+                        <label for="holidayName" class="form-label">Holiday Name *</label>
+                        <input type="text" class="form-control" id="holidayName" name="name" 
+                               placeholder="e.g., EBRD Christmas Closure" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="holidayDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="holidayDescription" name="description" rows="2"
+                                  placeholder="Optional description of the holiday period"></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="holidayStartDate" class="form-label">Start Date *</label>
+                                <input type="date" class="form-control" id="holidayStartDate" name="start_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="holidayEndDate" class="form-label">End Date *</label>
+                                <input type="date" class="form-control" id="holidayEndDate" name="end_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="holidayType" class="form-label">Holiday Type *</label>
+                        <select class="form-select" id="holidayType" name="holiday_type" required>
+                            <option value="bank_holiday">Bank Holiday / Office Shut</option>
+                            <option value="office_closure">Office Closure</option>
+                            <option value="personal_holiday">Personal Holiday</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveCustomHoliday()">
+                    <i class="fas fa-save me-2"></i>Save Holiday
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include flash messages component -->
+{% include 'components/flash_messages.html' %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/holidays.js') }}"></script>
+{% endblock %}

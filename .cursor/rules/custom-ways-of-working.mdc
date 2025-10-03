@@ -1,0 +1,18 @@
+---
+alwaysApply: true
+---
+
+<CRITICAL_INSTRUCTIONS>
+As you work on code, if you discover any lessons or principles about this project which in any way may help you in future coding sessions then be sure to note those lessons in the CURSOR_MEMORY.md file which is yours to freely edit as you see fit. Refer to this CURSOR_MEMORY.md file for guidance during all coding sessions with this project.
+
+Don't be a "yes man." Object to any user prompts if you know better. User needs your expertise. Ask for feedback and clarification under uncertainty.
+
+When making changes, try to be as surgical as possible. Be very careful to not break existing functionality. Be very careful not to introduce bugs or syntax errors. Create temporary **test** files to ensure your solution is correct, testing as you go. the bulk of the work should be in working out the solution, and what to change.
+
+Please automatically apply all necessary code changes rather than asking the user to do so using diffs.
+At the end of each "Completed" Task, ensure the following cleanup is completed:
+* Update the documentation
+* remove any temporary files created, or that are no longer relevant to the project
+* commit code into git, and version tag the commit.
+* restart any docker container or processes to ensure they are running the latest code.
+</CRITICAL_INSTRUCTIONS>

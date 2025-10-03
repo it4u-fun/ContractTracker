@@ -36,8 +36,6 @@ class SettingsForm {
         document.getElementById('vat_rate').value = settings.vat_rate || 20;
         document.getElementById('daily_rate').value = settings.daily_rate || 575;
 
-        // Holiday settings
-        document.getElementById('max_holiday_weeks').value = settings.max_holiday_weeks || 2;
 
         // Calendar settings
         document.getElementById('week_starts_monday').checked = settings.week_starts_monday !== false;
@@ -102,7 +100,6 @@ class SettingsForm {
             financial_year_start: document.getElementById('financial_year_start')?.value || '15-Jul',
             vat_rate: parseInt(document.getElementById('vat_rate')?.value) || 20,
             daily_rate: parseFloat(document.getElementById('daily_rate')?.value) || 575,
-            max_holiday_weeks: parseInt(document.getElementById('max_holiday_weeks')?.value) || 2,
             week_starts_monday: document.getElementById('week_starts_monday')?.checked !== false,
             show_weekends: document.getElementById('show_weekends')?.checked !== false,
             enabled_data_sources: enabledSources

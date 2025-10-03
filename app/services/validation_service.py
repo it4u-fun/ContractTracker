@@ -209,27 +209,8 @@ class ValidationService:
                 f"Day allocations found outside contract period: {', '.join(sorted(out_of_period_dates))}"
             )
         
-        # Check for missing allocations in key periods
-        working_days = contract.get_working_days()
-        if working_days:
-            # Check for gaps in working days
-            working_dates = [day.date for day in working_days]
-            working_dates.sort()
-            
-            gaps = []
-            for i in range(len(working_dates) - 1):
-                current_date = datetime.strptime(working_dates[i], '%Y-%m-%d')
-                next_date = datetime.strptime(working_dates[i + 1], '%Y-%m-%d')
-                gap_days = (next_date - current_date).days - 1
-                
-                if gap_days > 14:  # Gap of more than 2 weeks
-                    gaps.append(f"{working_dates[i]} to {working_dates[i + 1]} ({gap_days} days)")
-            
-            if gaps:
-                warnings.append(
-                    f"Large gaps between working periods: {', '.join(gaps)}. "
-                    "Consider if this affects project continuity."
-                )
+        # Note: Working period gap validation removed - gaps between working periods
+        # are often intentional and part of the contract structure (holidays, project phases, etc.)
         
         return {
             'violations': violations,

@@ -28,7 +28,10 @@
   - Inclusive date ranges must include both start and end.
   - Weekend styling: slightly grey by default; green when toggled to working.
   - Month working-days badge updates dynamically on click.
+  - **Current Date Highlighting**: Red border with "TODAY" label for current date
+  - **Past Days Styling**: Use 70% opacity to distinguish past days while maintaining full interactivity
 - **APIs**: Use `Utils.apiRequest` and keep endpoints stable. Tooltips should use each flag's `label`.
+- **JavaScript Date Handling**: Use `isCurrentDate()` and `isPastDate()` methods for consistent date comparisons
 
 ### Data Sources
 - **Custom Holidays**: Inclusive date handling; consistent `T00:00:00` parsing for comparison.
@@ -61,6 +64,8 @@
 - After code changes that affect the container:
   - Rebuild + run: `./docker-scripts.sh stop && ./docker-scripts.sh build && ./docker-scripts.sh run`
   - Verify endpoints with `curl`.
+- **Browser Cache Issues**: When JavaScript/CSS changes don't appear, restart Flask server to force cache refresh
+- **Container Management**: Use `docker start contract-tracker` to restart existing container instead of rebuilding
 
 ### Todos & Status Updates
 - Maintain a short, actionable TODO list for multi-step tasks.
@@ -88,6 +93,15 @@ curl -s http://localhost:5000/api/praewood/cache | jq '{success, total_dates: (.
 
 # Rebuild & run container
 ./docker-scripts.sh stop && ./docker-scripts.sh build && ./docker-scripts.sh run
+
+# Restart existing container (faster than rebuild)
+docker start contract-tracker
+
+# Check container status
+./docker-scripts.sh status
+
+# Clean up temporary files
+rm *.png
 ```
 
 ### Escalation

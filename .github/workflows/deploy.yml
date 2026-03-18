@@ -1,0 +1,43 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+
+env:
+  COMPOSE_PROJECT_NAME: contract-tracker
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify Docker
+        run: |
+          docker --version
+          docker-compose --version
+
+      - name: Build
+        run: docker-compose build
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        run: |
+          docker-compose down || true
+          docker-compose up -d
+          docker-compose ps
+
+  cleanup:
+    needs: deploy
+    runs-on: self-hosted
+    steps:
+      - name: Prune old images
+        run: docker system prune -f
